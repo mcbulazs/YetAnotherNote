@@ -1,0 +1,46 @@
+﻿<Window x:Class="YetAnotherNote.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YetAnotherNote"
+        mc:Ignorable="d" Height="450" Width="600"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        >
+     
+        <Grid Background="Black">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80px" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid  Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Name="Presets" MinWidth="100px" MaxWidth="400px" Width="180px"/>
+                <ColumnDefinition Width="3px"/>
+                <ColumnDefinition Name="PresetInfo" Width="*"/>
+            </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column="1" Width="5px" HorizontalAlignment="Stretch" Background="#FFC30909"/>
+        </Grid>
+        <Border Grid.Row="0" BorderBrush="#FFC30909" BorderThickness="3px,0,3px,1.5px"/>
+        <Rectangle Name="TitleBar" Height="20px" VerticalAlignment="Top" Fill="#FFC30909" MouseDown="DragMainWindow"/>
+
+        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="2px" HorizontalAlignment="Right" VerticalAlignment="Top" >
+            <TextBlock Name="MainWindowCloseButton" Text="✖" FontSize="12" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black" MouseDown="CloseMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave" />
+        </Border>
+        <!--<Border BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="20px,2px" HorizontalAlignment="Right" VerticalAlignment="Top" >
+            <TextBlock Name="MainWindowMaximizeButton"  Text="🗖" FontSize="15" LineHeight="16px" LineStackingStrategy="BlockLineHeight" Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center" MouseDown="MaximizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
+        </Border>-->
+        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="20px,2px" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                <TextBlock Name="MainWindowMinimizeButton" Text="🗕" Width="16px" FontSize="15"  LineHeight="16px" LineStackingStrategy="BlockLineHeight" Height="16px"  Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center"  MouseDown="MinimizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
+        </Border>
+
+
+        <Border Grid.Row="1" BorderBrush="#FFC30909" BorderThickness="3px,1.5px,3px,3px"/>
+
+
+        <!--<ResizeGrip Grid.Row="1" Width="20px" Foreground="White" Height="20px" HorizontalAlignment="Right" Margin="3px" VerticalAlignment="Bottom" MouseDown="ResizeMainWindow"/>-->
+    </Grid>
+
+</Window>
