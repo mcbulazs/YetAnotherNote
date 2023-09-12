@@ -12,32 +12,38 @@
      
         <Grid Background="Black">
         <Grid.RowDefinitions>
+            <RowDefinition Height="20px" />
             <RowDefinition Height="80px" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid  Grid.Row="1">
+        <Border MouseDown="CreateNewFolder" Grid.Row="1" BorderBrush="Red" BorderThickness="1" CornerRadius="2" Width="40" Height="40" Margin="20,0" HorizontalAlignment="Left" Background="Red" VerticalAlignment="Center">
+            <TextBlock Text="📁" Margin="-4,0,0,0"  FontSize="35" LineHeight="40" TextAlignment="Right" LineStackingStrategy="BlockLineHeight"  Foreground="Black"/>
+        </Border>
+        <TextBlock Grid.Row="1" Width="40" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="80,0" Background="Green"/>
+        <Rectangle/>
+        <Grid Grid.Row="2" Name="PresetsGrid">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Name="Presets" MinWidth="100px" MaxWidth="400px" Width="180px"/>
+                <ColumnDefinition  MinWidth="100px" MaxWidth="400px" Width="180px"/>
                 <ColumnDefinition Width="3px"/>
                 <ColumnDefinition Name="PresetInfo" Width="*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter Grid.Column="1" Width="5px" HorizontalAlignment="Stretch" Background="#FFC30909"/>
         </Grid>
-        <Border Grid.Row="0" BorderBrush="#FFC30909" BorderThickness="3px,0,3px,1.5px"/>
+        <Border Grid.Row="1" BorderBrush="#FFC30909" BorderThickness="3px,0,3px,1.5px"/>
         <Rectangle Name="TitleBar" Height="20px" VerticalAlignment="Top" Fill="#FFC30909" MouseDown="DragMainWindow"/>
 
-        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="2px" HorizontalAlignment="Right" VerticalAlignment="Top" >
+        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="2px" HorizontalAlignment="Right" VerticalAlignment="Center" >
             <TextBlock Name="MainWindowCloseButton" Text="✖" FontSize="12" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black" MouseDown="CloseMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave" />
         </Border>
         <!--<Border BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="20px,2px" HorizontalAlignment="Right" VerticalAlignment="Top" >
             <TextBlock Name="MainWindowMaximizeButton"  Text="🗖" FontSize="15" LineHeight="16px" LineStackingStrategy="BlockLineHeight" Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center" MouseDown="MaximizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
         </Border>-->
-        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="20px,2px" HorizontalAlignment="Right" VerticalAlignment="Top" >
+        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="20px,2px" HorizontalAlignment="Right" VerticalAlignment="Center" >
                 <TextBlock Name="MainWindowMinimizeButton" Text="🗕" Width="16px" FontSize="15"  LineHeight="16px" LineStackingStrategy="BlockLineHeight" Height="16px"  Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center"  MouseDown="MinimizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
         </Border>
 
 
-        <Border Grid.Row="1" BorderBrush="#FFC30909" BorderThickness="3px,1.5px,3px,3px"/>
+        <Border Grid.Row="2" BorderBrush="#FFC30909" BorderThickness="3px,1.5px,3px,3px"/>
 
 
         <!--<ResizeGrip Grid.Row="1" Width="20px" Foreground="White" Height="20px" HorizontalAlignment="Right" Margin="3px" VerticalAlignment="Bottom" MouseDown="ResizeMainWindow"/>-->

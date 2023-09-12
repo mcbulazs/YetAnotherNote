@@ -25,7 +25,7 @@ namespace YetAnotherNote
         public MainWindow()
         {
             InitializeComponent();
-            CurrentPresetes = new Presets();
+            CurrentPresetes = new Presets(this);
         }
         private void DragMainWindow(object sender, MouseButtonEventArgs e)
         {
@@ -48,6 +48,10 @@ namespace YetAnotherNote
         {
             this.WindowState= WindowState.Minimized;
         }
+        private void CreateNewFolder(object sender, MouseButtonEventArgs e)
+        {
+            CurrentPresetes.Main.CreateChildFolderMenu(sender,e);
+        }
 
         private void TitleBarButtonMouseEnter(object sender, MouseEventArgs e)
         {
@@ -58,8 +62,18 @@ namespace YetAnotherNote
         private void TitleBarButtonMouseLeave(object sender, MouseEventArgs e)
         {
             ((TextBlock)sender).Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-
             ((Border)((TextBlock)sender).Parent).BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+        }
+
+        public void PresetMouseEnter(object sender, MouseEventArgs e)
+        {
+            ((StackPanel)sender).Background = new SolidColorBrush(Color.FromRgb(80, 80, 80));
+            //((Border)((TextBlock)sender).Parent).BorderBrush = new SolidColorBrush(Color.FromRgb(128, 128, 128));
+        }
+        public void PresetMouseLeave(object sender, MouseEventArgs e)
+        {
+            ((StackPanel)sender).Background = new SolidColorBrush(Color.FromRgb(64,64,64));
+            //((Border)((TextBlock)sender).Parent).BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 0));
         }
 
     }
