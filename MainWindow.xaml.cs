@@ -52,6 +52,10 @@ namespace YetAnotherNote
         {
             CurrentPresetes.Main.CreateChildFolderMenu(sender,e);
         }
+        private void CreateNewPreset(object sender, MouseButtonEventArgs e)
+        {
+            CurrentPresetes.Main.CreateChildPresetMenu(sender, e);
+        }
 
         private void TitleBarButtonMouseEnter(object sender, MouseEventArgs e)
         {
@@ -75,6 +79,5 @@ namespace YetAnotherNote
             ((StackPanel)sender).Background = new SolidColorBrush(Color.FromRgb(64,64,64));
             //((Border)((TextBlock)sender).Parent).BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 0));
         }
-
     }
 }

@@ -17,21 +17,18 @@ namespace YetAnotherNote
     /// <summary>
     /// Interaction logic for singleLine.xaml
     /// </summary>
-    public partial class singleLine : Window
+    public partial class Confirm : Window
     {
-        Action<object,string> ApplyEvent;
-        object Caller;
-        public singleLine()
+        Action OkEvent;
+        public Confirm()
         {
             InitializeComponent();
         }
-        public singleLine(object caller,string Text, Action<object, string> action,string fill = "")
+        public Confirm(string Text, Action action)
         {
             InitializeComponent();
-            this.Caller=caller;
-            Title.Text = Text;
-            ApplyEvent = action;
-            TextLine.Text= fill;
+            Title.Text += Text+"?";
+            OkEvent = action;
         }
 
         private void CloseWindow(object sender, RoutedEventArgs e)
@@ -41,7 +38,7 @@ namespace YetAnotherNote
 
         private void ApplyButtonClick(object sender, RoutedEventArgs e)
         {
-            this.ApplyEvent(sender, TextLine.Text);
+            this.OkEvent();
             this.Close();
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
@@ -9,10 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 
 
 namespace YetAnotherNote
@@ -39,24 +42,87 @@ namespace YetAnotherNote
         public Folder Parent;
         protected Presets Context;
         public StackPanel StackPanelItem;
+        public string FolderName;
         public static string AppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\YetAnotherNote";
-        public PresetItem(Folder parent, string name, Presets context)
+        public PresetItem(Folder parent, string name, Presets context, string path)
         {
             this.Name = name;
             this.Parent = parent;
             if (parent != null)
             {
-                this.Path = parent.Path + "\\" + StringToPascalCase(name);
+                if (string.IsNullOrEmpty(path))
+                {
+                    reCalcPath();
+                }
+                else
+                {
+                    this.Path = path;
+                    this.FolderName = path.Substring(path.LastIndexOf("\\") + 1, path.Length - path.LastIndexOf("\\") - 1);
+                }
             }
             else
             {
                 this.Path = "\\Presets";
+                this.FolderName = "Presets";
             }
             Context = context;
         }
+        private void reCalcPath()
+        {
+            int i = 0;
+            if (this.GetType() == typeof(Folder))
+            {
+                while (Directory.Exists(AppDataPath + this.Parent.Path + "\\" + StringToPascalCase(this.Name) + "_" + i))
+                {
+                    i += 1;
+                }
+                this.Path = this.Parent.Path + "\\" + StringToPascalCase(this.Name) + "_" + i;
+            }
+            else
+            {
+                while (File.Exists(AppDataPath + this.Parent.Path + "\\" + StringToPascalCase(this.Name) + "_" + i + ".json"))
+                {
+                    i += 1;
+                }
+
+                this.Path = this.Parent.Path + "\\" + StringToPascalCase(this.Name) + "_" + i + ".json";
+            }
+
+            this.FolderName = this.GetType() == typeof(Folder) ? StringToPascalCase(this.Name) + "_" + i : this.Parent.FolderName;
+            if (this.GetType() == typeof(Folder) && ((Folder)this)?.Presets != null)
+            {
+                foreach (var item in ((Folder)this)?.Presets)
+                {
+                    item.reCalcPath();
+                }
+            }
+        }
+        public virtual void Delete()
+        {
+            this.Parent.Presets.Remove(this);
+            this.Parent.UpdateItemSettings();
+            if (this.GetType() == typeof(Folder))
+            {
+                Directory.Delete(this.getWholePath(), true);
+                int index = Context.StackPanels.IndexOf(this.StackPanelItem);
+                int amount = Context.calcRemoveAmount((Folder)this) + 1;
+                for (int i = index; i < index + amount; i++)
+                {
+                    Context.MainWindow.ScrollViewerContent.Children.Remove(Context.StackPanels[i]);
+                }
+                Context.StackPanels.RemoveRange(index, amount);
+            }
+            else
+            {
+                int index = Context.StackPanels.IndexOf(this.StackPanelItem);
+                Context.MainWindow.ScrollViewerContent.Children.Remove(Context.StackPanels[index]);
+                Context.StackPanels.RemoveAt(index);
+            }
+            Context.resizeStackPanels();
+        }
         public virtual string getJsonPath()
         {
-            return AppDataPath + this.Path + "\\" + this.Path.Substring(this.Path.LastIndexOf('\\') + 1) + ".json";
+            return AppDataPath + this.Path + "\\" + this.FolderName + ".json";
         }
         public static string getJsonPath(string text)
         {
@@ -66,6 +132,7 @@ namespace YetAnotherNote
             }
             return AppDataPath + text + "\\" + text.Substring(text.LastIndexOf('\\') + 1) + ".json";
         }
+
         public string getWholePath()
         {
             return AppDataPath + this.Path;
@@ -94,50 +161,191 @@ namespace YetAnotherNote
                 output += e;
             return output;
         }
-        public virtual StackPanel GenerateItem(int numberOfParents)
+        public virtual StackPanel GenerateItem()
         {
+            int numberOfParents = GetNumberOfParents();
             StackPanel item = new StackPanel();
             item.Height = 15;
-            item.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            item.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
             item.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             item.Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
-            item.ClipToBounds = false;
             item.Orientation = Orientation.Horizontal;
+            item.SizeChanged += StackPanelSizeChanged;
             //Text
             TextBlock Text = new TextBlock();
             Text.Height = 15;
-            Text.Width = 400;
+
             Text.Text = Name;
             Text.Foreground = new SolidColorBrush(Color.FromRgb(0, 192, 192));
             Text.Margin = new Thickness(0, 0, 0, 0);
 
             Text.LineHeight = 15;
             Text.FontSize = 11;
-            Text.TextAlignment = System.Windows.TextAlignment.Left;
+            Text.TextAlignment = System.Windows.TextAlignment.Center;
             Text.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             Text.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-
-
             item.Children.Add(Text);
+
+
+            TextBlock Move = new TextBlock();
+            Move.Cursor = Cursors.Hand;
+            Move.Text = "━";
+            Move.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            Move.TextAlignment = TextAlignment.Center;
+            Move.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+            Move.Width = 15;
+            Move.Height = 15;
+            Move.LineHeight = 15;
+            Move.FontSize = 11;
+            Move.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
+            Move.MouseLeftButtonDown += MoveCommand;
+            if (!Context.InMove || this.GetType() != typeof(Folder))
+            {
+                Move.Visibility = Visibility.Collapsed;
+            }
+            item.Children.Add(Move);
+
+
+
+
+            ContextMenu contextMenu = new ContextMenu();
+
+            MenuItem rename = new MenuItem();
+            rename.Header = "Rename";
+            rename.Click += RenameMenu;
+            contextMenu.Items.Add(rename);
+
+            MenuItem delete = new MenuItem();
+            delete.Header = "Delete";
+            delete.Click += DeleteMenu;
+            contextMenu.Items.Add(delete);
+
+            MenuItem move = new MenuItem();
+            move.Header = "Move";
+            move.Click += MoveMenu;
+            contextMenu.Items.Add(move);
+
+            item.ContextMenu = contextMenu;
+            item.ContextMenuOpening += (sender, e) =>
+            {
+                if (Context.InMove)
+                {
+                    e.Handled = true; // Prevent the context menu from opening
+                }
+            };
             return item;
+        }
+        public void MoveMenu(object sender, RoutedEventArgs e)
+        {
+            Context.StackPanels.Where(x => x.Name == "Folder").ToList().ForEach(x =>
+            {
+                TextBlock item = ((TextBlock)x.Children[2]);
+                item.Visibility = Visibility.Visible;
+                item.Text = "━";
+                item.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
+            });
+            if (this.Parent != Context.Main)
+            {
+                ((TextBlock)this.Parent.StackPanelItem.Children[2]).Visibility = Visibility.Collapsed;
+            }
+            TextBlock thisItem = (TextBlock)this.StackPanelItem.Children[2];
+            thisItem.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+            thisItem.Text = "✖";
+            thisItem.Visibility = Visibility.Visible;
+            Context.InMove = true;
+            Context.StackPanels.ForEach(x => x.ContextMenu.IsEnabled = false);
+            Context.MovedItem = this;
+        }
+        public void MoveCommand(object sender, RoutedEventArgs e)
+        {
+            Context.StackPanels.ForEach(x => ((TextBlock)x.Children[2]).Visibility = Visibility.Collapsed);
+            Context.InMove = false;
+
+            Context.StackPanels.ForEach(x => x.ContextMenu.IsEnabled = true);
+
+            if (Context.MovedItem.Equals(this))
+            {
+                return;
+            }
+            Context.MovedItem.Parent.Presets.Remove(Context.MovedItem);
+            Context.MovedItem.Parent.UpdateItemSettings();
+            ((Folder)this).Presets.Add(Context.MovedItem);
+            Context.MovedItem.Parent = (Folder)this;
+
+            string oldPath = Context.MovedItem.getWholePath();
+            Context.MovedItem.reCalcPath();
+            if (Context.MovedItem.GetType() == typeof(Folder))
+            {
+                Directory.Move(oldPath, Context.MovedItem.getWholePath());
+                ((Folder)Context.MovedItem).UpdateItemSettings();
+            }
+            else
+            {
+                File.Move(oldPath, Context.MovedItem.getJsonPath());
+                ((Preset)Context.MovedItem).UpdateItemSettings();
+            }
+            ((Folder)this).UpdateItemSettings();
+            Context.GenerateStackPanels(Context.Main, true);
+        }
+        public void StackPanelSizeChanged(object sender, RoutedEventArgs e)
+        {
+            TextBlock modifyitem = ((TextBlock)((StackPanel)sender).Children[2]);
+            double margin = (((StackPanel)sender).ActualWidth - ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth - 30 - this.GetNumberOfParents() * 10 + 5) - 10;
+            /*if (margin+10 > ((StackPanel)sender).ActualWidth)
+            {
+                margin = ((StackPanel)sender).ActualWidth - ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth - 30 - this.GetNumberOfParents() * 10 + 5) -10 -  
+            }*/
+            modifyitem.Margin = new Thickness(margin, 0, 0, 0);
         }
 
 
+        public void DeleteMenu(object sender, RoutedEventArgs e)
+        {
+            new Confirm(this.Name, Delete).ShowDialog();
+
+            //Context.GenerateStackPanels(Context.Main);
+        }
+        public void RenameMenu(object sender, RoutedEventArgs e)
+        {
+            new singleLine(this, "Rename", Rename, this.Name).ShowDialog();
+
+            //Context.GenerateStackPanels(Context.Main);
+        }
+        private void Rename(object sender, string name)
+        {
+            this.Name = name;
+            ((TextBlock)this.StackPanelItem.Children[1]).Text = name;
+            if (this.GetType() == typeof(Folder))
+            {
+                ((Folder)this).UpdateItemSettings();
+                return;
+            }
+            ((Preset)this).UpdateItemSettings();
+        }
+        protected int GetNumberOfParents()
+        {
+            return this.Path.Count(x => x == '\\') - 1;
+        }
     }
     class Preset : PresetItem
     {
         string Content;
-        public Preset(Folder parent, string name, Presets context) : base(parent, name, context)
+        public Preset(Folder parent, string name, Presets context, string path = null) : base(parent, name, context, path)
         {
-            this.Path += ".json";
             if (!File.Exists(getJsonPath()))
                 GenerateItemSettings();
+        }
+        public override void Delete()
+        {
+            base.Delete();
+            File.Delete(this.getJsonPath());
         }
         public void GenerateItemSettings()
         {
             PresetItemSettings settings = new PresetItemSettings();
-            settings.Type = "Folder";
+            settings.Type = "Preset";
             settings.Name = this.Name;
+            settings.Path = this.Path;
             settings.Content = this.Content;
 
             string json = JsonConvert.SerializeObject(settings);
@@ -149,26 +357,55 @@ namespace YetAnotherNote
             string json = File.ReadAllText(getJsonPath());
             PresetItemSettings settings = JsonConvert.DeserializeObject<PresetItemSettings>(json);
             settings.Name = this.Name;
+            settings.Path = this.Path;
             settings.Content = this.Content;
-
-             File.WriteAllText(getJsonPath(), JsonConvert.SerializeObject(settings));
+            File.WriteAllText(getJsonPath(), JsonConvert.SerializeObject(settings));
         }
-        public override StackPanel GenerateItem(int numberOfParents)
+        public override StackPanel GenerateItem()
         {
-            StackPanelItem = base.GenerateItem(numberOfParents);
-            ((TextBlock)StackPanelItem.Children[0]).Margin = new Thickness(numberOfParents * 10 + 15, 0, 0, 0);
+            int numberOfParents = GetNumberOfParents();
+            StackPanelItem = base.GenerateItem();
+            StackPanelItem.Name = "Preset";
+            TextBlock icon = new TextBlock();
+            icon.Text = "🗎";
+            icon.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            icon.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+            icon.Width = 10;
+            icon.Height = 15;
+            icon.LineHeight = 15;
+            icon.FontSize = 11;
+            icon.Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
+            icon.Foreground = new SolidColorBrush(Color.FromRgb(203, 119, 35));
+            StackPanelItem.Children.Insert(0, icon);
+
+            MenuItem duplicate = new MenuItem();
+            duplicate.Header = "Duplicate";
+            duplicate.Click += Duplicate;
+            StackPanelItem.ContextMenu.Items.Add(duplicate);
+            ((TextBlock)StackPanelItem.Children[0]).Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
             return StackPanelItem;
         }
         public override string getJsonPath()
         {
             return AppDataPath + this.Path;
         }
+        //TODO
+        //expand with other settings
+        public void Duplicate(object sender, RoutedEventArgs e)
+        {
+            Preset newItem = new Preset(this.Parent, this.Name + "_copy", this.Context);
+            newItem.Content = this.Content;
+            this.Parent.Presets.Add(newItem);
+            this.Parent.UpdateItemSettings();
+            newItem.GenerateItem();
+            Context.GenerateStackPanels(Context.StackPanels.IndexOf(this.StackPanelItem) + 1, this.Parent);
+        }
     }
     class Folder : PresetItem
     {
         public List<PresetItem> Presets;
         public bool IsExpanded;
-        public Folder(Folder parent, string name, Presets context) : base(parent, name, context)
+        public Folder(Folder parent, string name, Presets context, string path = null) : base(parent, name, context, path)
         {
             Presets = new List<PresetItem>();
             IsExpanded = false;
@@ -177,10 +414,10 @@ namespace YetAnotherNote
                 Directory.CreateDirectory(getWholePath());
                 GenerateItemSettings();
             }
+
             if (!File.Exists(getJsonPath()))
                 GenerateItemSettings();
         }
-
         public void GenerateItemSettings()
         {
             FolderItemSettings settings = new FolderItemSettings();
@@ -205,8 +442,8 @@ namespace YetAnotherNote
         }
         public void CreateChildFolderMenu(object sender, RoutedEventArgs e)
         {
-            new singleLine("Create New Folder", CreateChildFolder).ShowDialog();
-            
+            new singleLine(this, "Create New Folder", CreateChildFolder).ShowDialog();
+
             //Context.GenerateStackPanels(Context.Main);
         }
         private void CreateChildFolder(object sender, string name)
@@ -215,11 +452,11 @@ namespace YetAnotherNote
 
             Presets.Add(item);
             int index = 0;
-            if (contextMenuStackPanel!=null)
+            if (this.StackPanelItem != null)
             {
-                index = Context.StackPanels.IndexOf(contextMenuStackPanel);
+                index = Context.StackPanels.IndexOf(this.StackPanelItem);
                 Context.GenerateStackPanels(index + 1, this);
-                ((TextBlock)contextMenuStackPanel.Children[0]).RenderTransform = new RotateTransform(0);
+                ((TextBlock)this.StackPanelItem.Children[0]).RenderTransform = new RotateTransform(0);
             }
             else
             {
@@ -229,10 +466,11 @@ namespace YetAnotherNote
             IsExpanded = true;
             UpdateItemSettings();
         }
+
         public void CreateChildPresetMenu(object sender, RoutedEventArgs e)
         {
-            new singleLine("Create New Preset", CreateChildPreset).ShowDialog();
-            
+            new singleLine(this, "Create New Preset", CreateChildPreset).ShowDialog();
+
             //Context.GenerateStackPanels(Context.Main);
         }
         private void CreateChildPreset(object sender, string name)
@@ -241,11 +479,11 @@ namespace YetAnotherNote
 
             Presets.Add(item);
             int index = 0;
-            if (contextMenuStackPanel!=null)
+            if (this.StackPanelItem != null)
             {
-                index = Context.StackPanels.IndexOf(contextMenuStackPanel);
+                index = Context.StackPanels.IndexOf(this.StackPanelItem);
                 Context.GenerateStackPanels(index + 1, this);
-                ((TextBlock)contextMenuStackPanel.Children[0]).RenderTransform = new RotateTransform(0);
+                ((TextBlock)this.StackPanelItem.Children[0]).RenderTransform = new RotateTransform(0);
             }
             else
             {
@@ -276,12 +514,15 @@ namespace YetAnotherNote
             this.Name = Name;
             UpdateItemSettings();
         }
-        public override StackPanel GenerateItem(int numberOfParents)
+        public override StackPanel GenerateItem()
         {
-            StackPanelItem = base.GenerateItem(numberOfParents);
+            int numberOfParents = GetNumberOfParents();
+            StackPanelItem = base.GenerateItem();
+            StackPanelItem.Name = "Folder";
             //Collapse button
             TextBlock collapse = new TextBlock();
             collapse.Text = "▼";
+            collapse.Cursor = Cursors.Hand;
             if (!this.IsExpanded)
             {
                 collapse.RenderTransform = new RotateTransform(30, 5, 5);
@@ -294,30 +535,27 @@ namespace YetAnotherNote
             collapse.FontSize = 11;
             collapse.Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
             collapse.Foreground = new SolidColorBrush(Color.FromRgb(0, 192, 0));
-            collapse.MouseDown += CollapseFolder;
+            collapse.MouseLeftButtonDown += CollapseFolder;
             StackPanelItem.Children.Insert(0, collapse);
 
             //Context menu
 
-            ContextMenu contextMenu= new ContextMenu();
+
+            /*contextMenu.Background = new SolidColorBrush(Color.FromRgb(53, 53, 53));
+            contextMenu.Foreground = new SolidColorBrush(Color.FromRgb(247, 199, 195));
+            contextMenu.BorderBrush = new SolidColorBrush(Color.FromRgb(247, 199, 195));*/
             MenuItem newFolder = new MenuItem();
             newFolder.Header = "Create New Folder";
             newFolder.Click += CreateChildFolderMenu;
-            contextMenu.Items.Add(newFolder);
-            
+            StackPanelItem.ContextMenu.Items.Add(newFolder);
+
             MenuItem newPreset = new MenuItem();
             newPreset.Header = "Create New Preset";
             newPreset.Click += CreateChildPresetMenu;
-            contextMenu.Items.Add(newPreset);
-            
-            StackPanelItem.MouseRightButtonDown += savePanelOnContextOpen;
-            StackPanelItem.ContextMenu= contextMenu;
+            StackPanelItem.ContextMenu.Items.Add(newPreset);
+
+            //StackPanelItem.MouseRightButtonDown += savePanelOnContextOpen;
             return StackPanelItem;
-        }
-        private StackPanel contextMenuStackPanel = null;
-        private void savePanelOnContextOpen(object sender, MouseButtonEventArgs e)
-        {
-            contextMenuStackPanel = (StackPanel)sender;
         }
 
         private void CollapseFolder(object sender, MouseButtonEventArgs e)
@@ -329,14 +567,14 @@ namespace YetAnotherNote
                     ((TextBlock)sender).RenderTransform = new RotateTransform(0);
                     int index = Context.StackPanels.IndexOf((StackPanel)((TextBlock)sender).Parent);
                     Context.GenerateStackPanels(index + 1, this);
-                    IsExpanded= true;
+                    IsExpanded = true;
                     UpdateItemSettings();
                 }
                 else//close
                 {
                     ((TextBlock)sender).RenderTransform = new RotateTransform(30, 5, 5);
                     Context.RemoveStackPanels(this);
-                    IsExpanded= false;
+                    IsExpanded = false;
                     UpdateItemSettings();
                 }
             }
@@ -351,8 +589,10 @@ namespace YetAnotherNote
     }
     class Presets
     {
+        public bool InMove;
+        public PresetItem MovedItem;
         public Folder Main;
-        MainWindow MainWindow;
+        public MainWindow MainWindow;
         public List<StackPanel> StackPanels;
         public Presets(MainWindow window)
         {
@@ -382,10 +622,6 @@ namespace YetAnotherNote
                 Main.GenerateItemSettings();
             }
         }
-        private int GetNumberOfParents(PresetItem item)
-        {
-            return item.Path.Count(x => x == '\\') - 1;
-        }
         private void SetPresets()
         {
             string json = File.ReadAllText(Main.getJsonPath());
@@ -403,7 +639,7 @@ namespace YetAnotherNote
             if (settings.Type == "Folder")
             {
                 settings = JsonConvert.DeserializeObject<FolderItemSettings>(json);
-                Folder f = new Folder(parent, settings.Name, this);
+                Folder f = new Folder(parent, settings.Name, this, settings.Path);
                 f.IsExpanded = ((FolderItemSettings)settings).IsExpanded;
                 parent.Presets.Add(f);
 
@@ -418,14 +654,18 @@ namespace YetAnotherNote
                 parent.Presets.Add(f);
             }
         }
-        public void GenerateStackPanels(Folder baseFolder)
+        public void GenerateStackPanels(Folder baseFolder, bool repeat = false)
         {
-
+            if (repeat)
+            {
+                MainWindow.ScrollViewerContent.Children.RemoveRange(0, StackPanels.Count());
+                StackPanels.Clear();
+            }
             //StackPanels.AddRange(baseFolder.Presets.Select(x => x.GenerateItem(GetNumberOfParents(x))).ToList());
             foreach (PresetItem item in baseFolder.Presets)
             {
-                StackPanels.Add(item.GenerateItem(GetNumberOfParents(item)));
-                if (item.GetType()==typeof(Folder) && ((Folder)item).IsExpanded)
+                StackPanels.Add(item.GenerateItem());
+                if (item.GetType() == typeof(Folder) && ((Folder)item).IsExpanded)
                 {
                     GenerateStackPanels((Folder)item);
                 }
@@ -436,12 +676,12 @@ namespace YetAnotherNote
         {
             foreach (PresetItem item in baseFolder.Presets)
             {
-                if(!StackPanels.Contains(item.StackPanelItem))
+                if (!StackPanels.Contains(item.StackPanelItem))
                 {
-                    StackPanels.Insert(index++,item.GenerateItem(GetNumberOfParents(item)));
+                    StackPanels.Insert(index++, item.GenerateItem());
                     if (item.GetType() == typeof(Folder) && ((Folder)item).IsExpanded)
                     {
-                        GenerateStackPanels(index,(Folder)item);
+                        GenerateStackPanels(index, (Folder)item);
                     }
                 }
             }
@@ -449,16 +689,16 @@ namespace YetAnotherNote
         }
         public void RemoveStackPanels(Folder baseFolder)
         {
-            int index = StackPanels.IndexOf(baseFolder.StackPanelItem) +1;
-            int amount = calcRemoveAmount(baseFolder) ;
-            for (int i = index; i < index+ amount; i++)
+            int index = StackPanels.IndexOf(baseFolder.StackPanelItem) + 1;
+            int amount = calcRemoveAmount(baseFolder);
+            for (int i = index; i < index + amount; i++)
             {
-                MainWindow.PresetsGrid.Children.Remove(StackPanels[i]);
+                MainWindow.ScrollViewerContent.Children.Remove(StackPanels[i]);
             }
             StackPanels.RemoveRange(index, amount);
             resizeStackPanels();
         }
-        private int calcRemoveAmount(Folder folder)
+        public int calcRemoveAmount(Folder folder)
         {
             int i = folder.Presets.Count(x => x.GetType() != typeof(Folder));
             foreach (Folder item in folder.Presets.Where(x => x.GetType() == typeof(Folder)))
@@ -471,18 +711,24 @@ namespace YetAnotherNote
             }
             return i;
         }
-        private void resizeStackPanels()
+        public void resizeStackPanels()
         {
             int i = 0;
             foreach (var item in StackPanels)
             {
-                item.Margin = new Thickness(0, i++ * 15 * 1.1, 0, 0);
-                Grid.SetColumn(item, 0);
-                if (!MainWindow.PresetsGrid.Children.Contains(item))
-                    MainWindow.PresetsGrid.Children.Add(item);
+                item.Margin = new Thickness(0, 0.1, 0, 0);
+                if (!MainWindow.ScrollViewerContent.Children.Contains(item))
+                    MainWindow.ScrollViewerContent.Children.Insert(i,item);
+                i++;
                 item.MouseEnter += MainWindow.PresetMouseEnter;
                 item.MouseLeave += MainWindow.PresetMouseLeave;
             }
+            //ScrollBar scrollBar = new ScrollBar();
+            /*
+            if (StackPanels.Count() > 21 && !MainWindow.ScrollViewerContent.Children.Contains(scrollBar))
+            {
+                MainWindow.ScrollViewerContent.Children.Add(scrollBar);
+            }*/
         }
     }
 

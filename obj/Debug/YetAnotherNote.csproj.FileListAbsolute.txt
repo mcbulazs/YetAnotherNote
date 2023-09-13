@@ -19,3 +19,6 @@ D:\Projects\ C#\YetAnotherNote\bin\Debug\Newtonsoft.Json.xml
 D:\Projects\ C#\YetAnotherNote\obj\Debug\YetAnotherNote.csproj.CopyComplete
 D:\Projects\ C#\YetAnotherNote\obj\Debug\singleLine.g.cs
 D:\Projects\ C#\YetAnotherNote\obj\Debug\singleLine.baml
+D:\Projects\ C#\YetAnotherNote\obj\Debug\Confirm.g.cs
+D:\Projects\ C#\YetAnotherNote\obj\Debug\Confirm.baml
+D:\Projects\ C#\YetAnotherNote\obj\Debug\ScrollBar.baml

@@ -9,17 +9,32 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         >
-     
-        <Grid Background="Black">
+
+    <Grid Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition Height="20px" />
             <RowDefinition Height="80px" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Border MouseDown="CreateNewFolder" Grid.Row="1" BorderBrush="Red" BorderThickness="1" CornerRadius="2" Width="40" Height="40" Margin="20,0" HorizontalAlignment="Left" Background="Red" VerticalAlignment="Center">
-            <TextBlock Text="📁" Margin="-4,0,0,0"  FontSize="35" LineHeight="40" TextAlignment="Right" LineStackingStrategy="BlockLineHeight"  Foreground="Black"/>
+            <TextBlock Text="📁" Margin="-4,0,0,0" FontSize="35" LineHeight="40" TextAlignment="Right" LineStackingStrategy="BlockLineHeight"  Foreground="Black">
+                <TextBlock.ToolTip>
+                    <ToolTip Height="25" Background="#353535" Padding="0"  BorderBrush="#f7c7c3">
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3" Foreground="#f7c7c3"  LineStackingStrategy="MaxHeight"  Text="Create new Folder in the deafult folder"/>
+                    </ToolTip>
+                </TextBlock.ToolTip>
+            </TextBlock>
         </Border>
-        <TextBlock Grid.Row="1" Width="40" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="80,0" Background="Green"/>
+        <Border MouseDown="CreateNewPreset" Grid.Row="1" BorderBrush="Red" BorderThickness="1" CornerRadius="2" Width="40" Height="40"  Margin="80,0" HorizontalAlignment="Left" Background="Red" VerticalAlignment="Center">
+            <TextBlock Text="🗎" Margin="4,3,5,0"  FontWeight="Bold" FontSize="45" LineHeight="40" TextAlignment="Right" LineStackingStrategy="BlockLineHeight"  Foreground="Black">
+                <TextBlock.ToolTip>
+                    <ToolTip Height="25" Background="#353535" Padding="0"  BorderBrush="#f7c7c3">
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3" Foreground="#f7c7c3"  LineStackingStrategy="MaxHeight"  Text="Create new Preset in the deafult folder"/>
+                    </ToolTip>
+                </TextBlock.ToolTip>
+            </TextBlock>
+        </Border>
+
         <Rectangle/>
         <Grid Grid.Row="2" Name="PresetsGrid">
             <Grid.ColumnDefinitions>
@@ -27,6 +42,9 @@
                 <ColumnDefinition Width="3px"/>
                 <ColumnDefinition Name="PresetInfo" Width="*"/>
             </Grid.ColumnDefinitions>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                <StackPanel  Name="ScrollViewerContent" Margin="0,0,0,3"/>
+            </ScrollViewer>
             <GridSplitter Grid.Column="1" Width="5px" HorizontalAlignment="Stretch" Background="#FFC30909"/>
         </Grid>
         <Border Grid.Row="1" BorderBrush="#FFC30909" BorderThickness="3px,0,3px,1.5px"/>
@@ -39,7 +57,7 @@
             <TextBlock Name="MainWindowMaximizeButton"  Text="🗖" FontSize="15" LineHeight="16px" LineStackingStrategy="BlockLineHeight" Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center" MouseDown="MaximizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
         </Border>-->
         <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="20px,2px" HorizontalAlignment="Right" VerticalAlignment="Center" >
-                <TextBlock Name="MainWindowMinimizeButton" Text="🗕" Width="16px" FontSize="15"  LineHeight="16px" LineStackingStrategy="BlockLineHeight" Height="16px"  Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center"  MouseDown="MinimizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
+            <TextBlock Name="MainWindowMinimizeButton" Text="🗕" Width="16px" FontSize="15"  LineHeight="16px" LineStackingStrategy="BlockLineHeight" Height="16px"  Foreground="White" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Center"  MouseDown="MinimizeMainWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave"/>
         </Border>
 
 
@@ -48,5 +66,12 @@
 
         <!--<ResizeGrip Grid.Row="1" Width="20px" Foreground="White" Height="20px" HorizontalAlignment="Right" Margin="3px" VerticalAlignment="Bottom" MouseDown="ResizeMainWindow"/>-->
     </Grid>
-
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ScrollBar.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
 </Window>
+    
