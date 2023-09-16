@@ -193,7 +193,7 @@
                                Maximum="{TemplateBinding ScrollableHeight}"
                                ViewportSize="{TemplateBinding ViewportHeight}"
                                Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
-                       
+
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

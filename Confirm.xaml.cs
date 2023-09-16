@@ -27,7 +27,7 @@ namespace YetAnotherNote
         public Confirm(string Text, Action action)
         {
             InitializeComponent();
-            Title.Text += Text+"?";
+            Title.Text += Text + "?";
             OkEvent = action;
         }
 

@@ -19,19 +19,19 @@ namespace YetAnotherNote
     /// </summary>
     public partial class singleLine : Window
     {
-        Action<object,string> ApplyEvent;
+        Action<object, string> ApplyEvent;
         object Caller;
         public singleLine()
         {
             InitializeComponent();
         }
-        public singleLine(object caller,string Text, Action<object, string> action,string fill = "")
+        public singleLine(object caller, string Text, Action<object, string> action, string fill = "")
         {
             InitializeComponent();
-            this.Caller=caller;
+            this.Caller = caller;
             Title.Text = Text;
             ApplyEvent = action;
-            TextLine.Text= fill;
+            TextLine.Text = fill;
         }
 
         private void CloseWindow(object sender, RoutedEventArgs e)

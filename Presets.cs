@@ -1,25 +1,39 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Markup;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using System.Xml.Linq;
 
 
 namespace YetAnotherNote
 {
+    public class ContentImage
+    {
+        public double Width;
+        public double Height;
+        public double X;
+        public double Y;
+        public string Image;
+    }
+    public class PresetContent 
+    {
+        public double X;
+        public double Y;
+        public string ForegroundHex;
+        public string BackgroundHex;
+        public double ForegroundAlpha;
+        public double BackgroundAlpha;
+        public bool TopMost;
+        public bool RemoveBorder;
+        public bool ClickThrough;
+        public string FontSize;
+        List<ContentImage> ContentImages;
+    }
     class ItemSettings
     {
         public string Type;
@@ -33,9 +47,9 @@ namespace YetAnotherNote
     }
     class PresetItemSettings : ItemSettings
     {
-        public string Content;
+        public PresetContent Content;
     }
-    class PresetItem
+    public class PresetItem
     {
         public string Name;
         public string Path;
@@ -205,6 +219,7 @@ namespace YetAnotherNote
             }
             item.Children.Add(Move);
 
+            item.MouseLeftButtonDown += OpenControls;
 
 
 
@@ -234,6 +249,52 @@ namespace YetAnotherNote
                 }
             };
             return item;
+        }
+        public void OpenControls(object sender, RoutedEventArgs e)
+        {
+            MainWindow controls = Context.MainWindow;
+            if (this.GetType() == typeof(Preset))
+            {
+                controls.PresetControls.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                controls.PresetControls.Visibility = Visibility.Hidden;
+                return;
+            }
+            Preset item = (Preset)this;
+
+            //foreground
+            var FColor = controls.ConvertHexToRgb(item.Content.ForegroundHex);
+            controls.FColorSquare.Color.RGB_R =  FColor.Red; 
+            controls.FColorSquare.Color.RGB_R =  FColor.Green; 
+            controls.FColorSquare.Color.RGB_R =  FColor.Blue;
+
+            controls.FColorHex.Text = item.Content.ForegroundHex;
+
+            /*controls.FColorHex.Color.RGB_R =  FColor.Red; 
+            controls.FColorHex.Color.RGB_R =  FColor.Green; 
+            controls.FColorHex.Color.RGB_R =  FColor.Blue;*/
+
+            controls.FColoroAlpha.Color.A = item.Content.ForegroundAlpha;
+
+            controls.FontSizeTextBox.Text = item.Content.FontSize;
+            //background
+            var BColor = controls.ConvertHexToRgb(item.Content.BackgroundHex);
+            controls.BColorSquare.Color.RGB_R = BColor.Red;
+            controls.BColorSquare.Color.RGB_R = BColor.Green;
+            controls.BColorSquare.Color.RGB_R = BColor.Blue;
+
+            controls.BColorHex.Text = item.Content.BackgroundHex;
+
+
+            controls.BColoroAlpha.Color.A = item.Content.BackgroundAlpha;
+
+            controls.CBTopMost.IsChecked = item.Content.TopMost;
+            controls.CBClickThrough.IsChecked = item.Content.ClickThrough;
+            controls.CBRemoveBorder.IsChecked = item.Content.RemoveBorder;
+
+
         }
         public void MoveMenu(object sender, RoutedEventArgs e)
         {
@@ -327,9 +388,9 @@ namespace YetAnotherNote
             return this.Path.Count(x => x == '\\') - 1;
         }
     }
-    class Preset : PresetItem
+    public class Preset : PresetItem
     {
-        string Content;
+        public PresetContent Content;
         public Preset(Folder parent, string name, Presets context, string path = null) : base(parent, name, context, path)
         {
             if (!File.Exists(getJsonPath()))
@@ -383,6 +444,12 @@ namespace YetAnotherNote
             duplicate.Click += Duplicate;
             StackPanelItem.ContextMenu.Items.Add(duplicate);
             ((TextBlock)StackPanelItem.Children[0]).Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
+
+            StackPanelItem.MouseLeftButtonDown += (sender, e) =>
+            {
+                Editor asd = new Editor(this);
+                asd.ShowDialog();
+            };
             return StackPanelItem;
         }
         public override string getJsonPath()
@@ -401,7 +468,7 @@ namespace YetAnotherNote
             Context.GenerateStackPanels(Context.StackPanels.IndexOf(this.StackPanelItem) + 1, this.Parent);
         }
     }
-    class Folder : PresetItem
+    public class Folder : PresetItem
     {
         public List<PresetItem> Presets;
         public bool IsExpanded;
@@ -587,7 +654,7 @@ namespace YetAnotherNote
             }
         }
     }
-    class Presets
+    public class Presets
     {
         public bool InMove;
         public PresetItem MovedItem;
@@ -718,7 +785,7 @@ namespace YetAnotherNote
             {
                 item.Margin = new Thickness(0, 0.1, 0, 0);
                 if (!MainWindow.ScrollViewerContent.Children.Contains(item))
-                    MainWindow.ScrollViewerContent.Children.Insert(i,item);
+                    MainWindow.ScrollViewerContent.Children.Insert(i, item);
                 i++;
                 item.MouseEnter += MainWindow.PresetMouseEnter;
                 item.MouseLeave += MainWindow.PresetMouseLeave;
