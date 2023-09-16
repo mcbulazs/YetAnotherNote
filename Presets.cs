@@ -31,7 +31,7 @@ namespace YetAnotherNote
         public bool TopMost;
         public bool RemoveBorder;
         public bool ClickThrough;
-        public string FontSize;
+        public int FontSize;
         List<ContentImage> ContentImages;
     }
     class ItemSettings
@@ -252,6 +252,7 @@ namespace YetAnotherNote
         }
         public void OpenControls(object sender, RoutedEventArgs e)
         {
+            return;
             MainWindow controls = Context.MainWindow;
             if (this.GetType() == typeof(Preset))
             {
@@ -264,11 +265,12 @@ namespace YetAnotherNote
             }
             Preset item = (Preset)this;
 
+            controls.ActivePresetControl = item;
             //foreground
             var FColor = controls.ConvertHexToRgb(item.Content.ForegroundHex);
             controls.FColorSquare.Color.RGB_R =  FColor.Red; 
-            controls.FColorSquare.Color.RGB_R =  FColor.Green; 
-            controls.FColorSquare.Color.RGB_R =  FColor.Blue;
+            controls.FColorSquare.Color.RGB_G =  FColor.Green; 
+            controls.FColorSquare.Color.RGB_B =  FColor.Blue;
 
             controls.FColorHex.Text = item.Content.ForegroundHex;
 
@@ -276,19 +278,19 @@ namespace YetAnotherNote
             controls.FColorHex.Color.RGB_R =  FColor.Green; 
             controls.FColorHex.Color.RGB_R =  FColor.Blue;*/
 
-            controls.FColoroAlpha.Color.A = item.Content.ForegroundAlpha;
+            controls.FColorAlpha.Color.A = item.Content.ForegroundAlpha;
 
-            controls.FontSizeTextBox.Text = item.Content.FontSize;
+            controls.FontSizeTextBox.Text = item.Content.FontSize.ToString();
             //background
             var BColor = controls.ConvertHexToRgb(item.Content.BackgroundHex);
             controls.BColorSquare.Color.RGB_R = BColor.Red;
-            controls.BColorSquare.Color.RGB_R = BColor.Green;
-            controls.BColorSquare.Color.RGB_R = BColor.Blue;
+            controls.BColorSquare.Color.RGB_G = BColor.Green;
+            controls.BColorSquare.Color.RGB_B = BColor.Blue;
 
             controls.BColorHex.Text = item.Content.BackgroundHex;
 
 
-            controls.BColoroAlpha.Color.A = item.Content.BackgroundAlpha;
+            controls.BColorAlpha.Color.A = item.Content.BackgroundAlpha;
 
             controls.CBTopMost.IsChecked = item.Content.TopMost;
             controls.CBClickThrough.IsChecked = item.Content.ClickThrough;
@@ -351,11 +353,12 @@ namespace YetAnotherNote
         public void StackPanelSizeChanged(object sender, RoutedEventArgs e)
         {
             TextBlock modifyitem = ((TextBlock)((StackPanel)sender).Children[2]);
-            double margin = (((StackPanel)sender).ActualWidth - ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth - 30 - this.GetNumberOfParents() * 10 + 5) - 10;
-            /*if (margin+10 > ((StackPanel)sender).ActualWidth)
+            if (modifyitem.Text== "✖")
             {
-                margin = ((StackPanel)sender).ActualWidth - ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth - 30 - this.GetNumberOfParents() * 10 + 5) -10 -  
-            }*/
+                Context.MainWindow.FontSizeTextBox.Text = ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth.ToString();
+                //Context.MainWindow.FontSizeTextBox.Text = modifyitem.Margin.Left.ToString();
+            }
+            double margin = (((StackPanel)sender).ActualWidth - ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth - 30 - this.GetNumberOfParents() * 10 + 5) - 10;
             modifyitem.Margin = new Thickness(margin, 0, 0, 0);
         }
 

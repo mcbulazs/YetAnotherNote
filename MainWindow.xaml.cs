@@ -25,9 +25,11 @@ namespace YetAnotherNote
     public partial class MainWindow : Window
     {
         Presets CurrentPresetes;
+        public Preset ActivePresetControl;
         public MainWindow()
         {
             InitializeComponent();
+            ActivePresetControl = null;
             CurrentPresetes = new Presets(this);
         }
         private void DragMainWindow(object sender, MouseButtonEventArgs e)
@@ -100,28 +102,29 @@ namespace YetAnotherNote
             {
                 return;
             }
-            FColorHex.Text =ConvertRgbToHex((int)Math.Round(FColorSquare.Color.RGB_R), (int)Math.Round(FColorSquare.Color.RGB_G), (int)Math.Round(FColorSquare.Color.RGB_B)).ToUpper();
-            //FColorHex. = ((ColorPicker.SquarePicker)sender).Color;
+            FColorHex.Text = ConvertRgbToHex((int)Math.Round(FColorSquare.Color.RGB_R), (int)Math.Round(FColorSquare.Color.RGB_G), (int)Math.Round(FColorSquare.Color.RGB_B)).ToUpper();
+            ActivePresetControl.Content.ForegroundHex = FColorHex.Text;
+            ActivePresetControl.UpdateItemSettings();
         }
         private void FColorHexChanged(object sender, KeyEventArgs e)
         {
             inHex = true;
             string key = e.Key.ToString();
-            if (FColorHex.Text.Length>=6 &&  !new Regex("^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
+            if (FColorHex.Text.Length >= 6 && !new Regex("^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
             {
                 e.Handled = true;
                 return;
             }
             if (!new Regex("^[A-Fa-f]$|^NumPad[0-9]$|^D[0-9]$|^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
             {
-                e.Handled= true;
+                e.Handled = true;
                 return;
             }
             try
             {
                 if (new Regex("^[A-Fa-f]$|^NumPad[0-9]$|^D[0-9]$").IsMatch(key) && new Regex("^([A-Fa-f0-9]{5}|[A-Fa-f0-9]{2})$").IsMatch(FColorHex.Text))
                 {
-                    FColorSquare.Color.RGB_R = ConvertHexToRgb(FColorHex.Text + key[key.Length-1]).Red;
+                    FColorSquare.Color.RGB_R = ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Red;
                     FColorSquare.Color.RGB_G = ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Green;
                     FColorSquare.Color.RGB_B = ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Red;
                 }
@@ -139,28 +142,30 @@ namespace YetAnotherNote
             {
                 return;
             }
-            BColorHex.Text = ConvertRgbToHex((int)Math.Round(BColorSquare.Color.RGB_R), (int)Math.Round(BColorSquare.Color.RGB_G), (int)Math.Round(BColorSquare.Color.RGB_B)).ToUpper();
+            BColorHex.Text = ConvertRgbToHex((int)Math.Round(BColorSquare.Color.RGB_G), (int)Math.Round(BColorSquare.Color.RGB_G), (int)Math.Round(BColorSquare.Color.RGB_B)).ToUpper();
+            ActivePresetControl.Content.BackgroundHex = BColorHex.Text;
+            ActivePresetControl.UpdateItemSettings();
             //FColorHex. = ((ColorPicker.SquarePicker)sender).Color;
         }
         private void BColorHexChanged(object sender, KeyEventArgs e)
         {
-            inHex=true;
+            inHex = true;
             string key = e.Key.ToString();
-            if (BColorHex.Text.Length>=6 &&  !new Regex("^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
+            if (BColorHex.Text.Length >= 6 && !new Regex("^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
             {
                 e.Handled = true;
                 return;
             }
             if (!new Regex("^[A-Fa-f]$|^NumPad[0-9]$|^D[0-9]$|^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
             {
-                e.Handled= true;
+                e.Handled = true;
                 return;
             }
             try
             {
                 if (new Regex("^[A-Fa-f]$|^NumPad[0-9]$|^D[0-9]$").IsMatch(key) && new Regex("^([A-Fa-f0-9]{5}|[A-Fa-f0-9]{2})$").IsMatch(BColorHex.Text))
                 {
-                    BColorSquare.Color.RGB_R = ConvertHexToRgb(BColorHex.Text + key[key.Length-1]).Red;
+                    BColorSquare.Color.RGB_R = ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Red;
                     BColorSquare.Color.RGB_G = ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Green;
                     BColorSquare.Color.RGB_B = ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Red;
                 }
@@ -170,6 +175,65 @@ namespace YetAnotherNote
             { }
 
             inHex = false;
+        }
+
+        private void FColorAplhaChanged(object sender, RoutedEventArgs e)
+        {
+            ActivePresetControl.Content.ForegroundAlpha = FColorAlpha.Color.A;
+            ActivePresetControl.UpdateItemSettings();
+        }
+        private void BColorAplhaChanged(object sender, RoutedEventArgs e)
+        {
+            ActivePresetControl.Content.BackgroundAlpha = BColorAlpha.Color.A;
+            ActivePresetControl.UpdateItemSettings();
+        }
+
+        private void CBClickThrough_Click(object sender, RoutedEventArgs e)
+        {
+
+            ActivePresetControl.Content.ClickThrough = (bool)CBClickThrough.IsChecked;
+            ActivePresetControl.UpdateItemSettings();
+        }
+
+        private void CBTopMost_Click(object sender, RoutedEventArgs e)
+        {
+            ActivePresetControl.Content.TopMost = (bool)CBClickThrough.IsChecked;
+            ActivePresetControl.UpdateItemSettings();
+        }
+
+        private void CBRemoveBorder_Click(object sender, RoutedEventArgs e)
+        {
+            ActivePresetControl.Content.RemoveBorder = (bool)CBClickThrough.IsChecked;
+            ActivePresetControl.UpdateItemSettings();
+        }
+
+        private void FontSizeKeyDown(object sender, KeyEventArgs e)
+        {
+            string key = e.Key.ToString();
+            if (!new Regex("^NumPad[0-9]$|^D[0-9]$|^Back$|^Left$|^Right$|^Delete$").IsMatch(key))
+            {
+                e.Handled = true;
+                return;
+            }
+        }
+
+        private void FontSizeIncreaseValue(object sender, RoutedEventArgs e)
+        {
+            FontSizeTextBox.Text = (int.Parse(FontSizeTextBox.Text) + 1).ToString();
+        }
+
+        private void FontSizeDecreaseValue(object sender, RoutedEventArgs e)
+        {
+            if (FontSizeTextBox.Text!="0")
+            {
+                FontSizeTextBox.Text = (int.Parse(FontSizeTextBox.Text) - 1).ToString();
+            }
+        }
+
+        private void UpdateFontSizeSettings(object sender, TextChangedEventArgs e)
+        {/*
+            ActivePresetControl.Content.FontSize = int.Parse(FontSizeTextBox.Text);
+            ActivePresetControl.UpdateItemSettings();*/
         }
     }
 }
