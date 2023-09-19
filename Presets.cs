@@ -39,7 +39,7 @@ namespace YetAnotherNote
         public bool ClickThrough;
         public int FontSize;
         public List<ContentImage> ContentImages;
-        public int NextImageId=0;
+        public int NextImageId = 0;
 
     }
     class ItemSettings
@@ -63,10 +63,10 @@ namespace YetAnotherNote
         public string Path;
         public Folder Parent;
         protected Presets Context;
-        public StackPanel StackPanelItem;
+        public Grid StackPanelItem;
         public string FolderName;
         public static string AppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\YetAnotherNote";
-        public bool isSelected=false;
+        public bool isSelected = false;
         public bool isActive = false;
         public PresetItem(Folder parent, string name, Presets context, string path)
         {
@@ -132,12 +132,23 @@ namespace YetAnotherNote
                 int amount = Context.calcRemoveAmount((Folder)this) + 1;
                 for (int i = index; i < index + amount; i++)
                 {
+                    
                     Context.MainWindow.ScrollViewerContent.Children.Remove(Context.StackPanels[i]);
+                    if (Context.StackPanels[i]==this.StackPanelItem)
+                    {
+                        Context.MainWindow.ShowButton_Click(null, null);
+                        Context.MainWindow.PresetControls.Visibility = Visibility.Hidden;
+                    }
                 }
                 Context.StackPanels.RemoveRange(index, amount);
             }
             else
             {
+                if (Context.MainWindow.ActivePresetControl==this)
+                {
+                    Context.MainWindow.ShowButton_Click(null, null);
+                    Context.MainWindow.PresetControls.Visibility= Visibility.Hidden;
+                }
                 int index = Context.StackPanels.IndexOf(this.StackPanelItem);
                 Context.MainWindow.ScrollViewerContent.Children.Remove(Context.StackPanels[index]);
                 Context.StackPanels.RemoveAt(index);
@@ -239,7 +250,7 @@ namespace YetAnotherNote
                 if (!this.isSelected && !this.isActive)
                     item.Background = new SolidColorBrush(Color.FromRgb(80, 80, 80));
             };
-            item.MouseLeave+= (object sender, MouseEventArgs e) =>
+            item.MouseLeave += (object sender, MouseEventArgs e) =>
             {
                 if (!this.isSelected && !this.isActive)
                     item.Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
@@ -280,28 +291,38 @@ namespace YetAnotherNote
         public void OpenControls(object sender, RoutedEventArgs e)
         {
             MainWindow controls = Context.MainWindow;
-            if (controls.ActivePresetControl!=null)
+            if (controls.ActivePresetControl != null)
             {
                 controls.ActivePresetControl.isActive = false;
                 if (controls.ActivePresetControl.isSelected)
-                    controls.ActivePresetControl.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(40, 40, 40));
+                    ((StackPanel)controls.ActivePresetControl.StackPanelItem.Children[0]).Background = new SolidColorBrush(Color.FromRgb(40, 40, 40));
                 else
-                    controls.ActivePresetControl.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
+                    ((StackPanel)controls.ActivePresetControl.StackPanelItem.Children[0]).Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
             }
-          
-            if (this.GetType() == typeof(Preset))
+            if (sender != null)
             {
-                controls.PresetControls.Visibility = Visibility.Visible;
+
+                if (this.GetType() == typeof(Preset))
+                {
+                    controls.PresetControls.Visibility = Visibility.Visible;
+                }
+                else if (this.GetType() == typeof(Folder))
+                {
+                    controls.PresetControls.Visibility = Visibility.Hidden;
+                    return;
+                }
             }
             else
             {
+
                 controls.PresetControls.Visibility = Visibility.Hidden;
                 return;
+
             }
             Preset item = (Preset)this;
-            
+
             this.isActive = true;
-            this.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(120, 120, 120));
+            ((StackPanel)this.StackPanelItem.Children[0]).Background = new SolidColorBrush(Color.FromRgb(120, 120, 120));
 
             controls.ActivePresetControl = item;
             //foreground
@@ -349,7 +370,7 @@ namespace YetAnotherNote
             {
                 ((TextBlock)((Grid)this.Parent.StackPanelItem.Parent).Children[1]).Visibility = Visibility.Collapsed;
             }
-            TextBlock thisItem = (TextBlock)((Grid)this.StackPanelItem.Parent).Children[1];
+            TextBlock thisItem = (TextBlock)this.StackPanelItem.Children[1];
             thisItem.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
             thisItem.Text = "✖";
             thisItem.Visibility = Visibility.Visible;
@@ -416,7 +437,7 @@ namespace YetAnotherNote
         private void Rename(object sender, string name)
         {
             this.Name = name;
-            ((TextBlock)this.StackPanelItem.Children[1]).Text = name;
+            ((TextBlock)((StackPanel)this.StackPanelItem.Children[0]).Children[1]).Text = name;
             if (this.GetType() == typeof(Folder))
             {
                 ((Folder)this).UpdateItemSettings();
@@ -437,7 +458,7 @@ namespace YetAnotherNote
         {
             if (!File.Exists(getJsonPath()))
                 GenerateItemSettings();
-            if (content==null)
+            if (content == null)
             {
                 Content = new PresetContent
                 {
@@ -492,7 +513,7 @@ namespace YetAnotherNote
         {
             int numberOfParents = GetNumberOfParents();
             Grid grid = base.GenerateItem();
-            StackPanelItem = (StackPanel)grid.Children[0];
+            StackPanelItem = grid;
             StackPanelItem.Name = "Preset";
             TextBlock icon = new TextBlock();
             icon.Text = "🗎";
@@ -504,13 +525,13 @@ namespace YetAnotherNote
             icon.FontSize = 11;
             icon.Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
             icon.Foreground = new SolidColorBrush(Color.FromRgb(203, 119, 35));
-            StackPanelItem.Children.Insert(0, icon);
+            ((StackPanel)StackPanelItem.Children[0]).Children.Insert(0, icon);
 
             MenuItem duplicate = new MenuItem();
             duplicate.Header = "Duplicate";
             duplicate.Click += Duplicate;
-            StackPanelItem.ContextMenu.Items.Add(duplicate);
-            ((TextBlock)StackPanelItem.Children[0]).Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
+            ((StackPanel)StackPanelItem.Children[0]).ContextMenu.Items.Add(duplicate);
+            ((TextBlock)((StackPanel)StackPanelItem.Children[0]).Children[0]).Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
 
             return grid;
         }
@@ -612,7 +633,7 @@ namespace YetAnotherNote
             {
                 index = Context.StackPanels.IndexOf(this.StackPanelItem);
                 Context.GenerateStackPanels(index + 1, this);
-                ((TextBlock)this.StackPanelItem.Children[0]).RenderTransform = new RotateTransform(0);
+                ((TextBlock)((StackPanel)this.StackPanelItem.Children[0]).Children[0]).RenderTransform = new RotateTransform(0);
             }
             else
             {
@@ -647,7 +668,7 @@ namespace YetAnotherNote
         {
             int numberOfParents = GetNumberOfParents();
             Grid grid = base.GenerateItem();
-            StackPanelItem = (StackPanel)grid.Children[0];
+            StackPanelItem = grid;
             StackPanelItem.Name = "Folder";
             //Collapse button
             TextBlock collapse = new TextBlock();
@@ -666,7 +687,7 @@ namespace YetAnotherNote
             collapse.Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
             collapse.Foreground = new SolidColorBrush(Color.FromRgb(0, 192, 0));
             collapse.MouseLeftButtonDown += CollapseFolder;
-            StackPanelItem.Children.Insert(0, collapse);
+            ((StackPanel)StackPanelItem.Children[0]).Children.Insert(0, collapse);
 
             //Context menu
 
@@ -677,12 +698,12 @@ namespace YetAnotherNote
             MenuItem newFolder = new MenuItem();
             newFolder.Header = "Create New Folder";
             newFolder.Click += CreateChildFolderMenu;
-            StackPanelItem.ContextMenu.Items.Add(newFolder);
+            ((StackPanel)StackPanelItem.Children[0]).ContextMenu.Items.Add(newFolder);
 
             MenuItem newPreset = new MenuItem();
             newPreset.Header = "Create New Preset";
             newPreset.Click += CreateChildPresetMenu;
-            StackPanelItem.ContextMenu.Items.Add(newPreset);
+            ((StackPanel)StackPanelItem.Children[0]).ContextMenu.Items.Add(newPreset);
 
             //StackPanelItem.MouseRightButtonDown += savePanelOnContextOpen;
             return grid;
@@ -695,7 +716,7 @@ namespace YetAnotherNote
                 if (rotateTransform.Angle == 30)//open
                 {
                     ((TextBlock)sender).RenderTransform = new RotateTransform(0);
-                    int index = Context.StackPanels.IndexOf((StackPanel)((TextBlock)sender).Parent);
+                    int index = Context.StackPanels.IndexOf((Grid)((StackPanel)((TextBlock)sender).Parent).Parent);
                     Context.GenerateStackPanels(index + 1, this);
                     IsExpanded = true;
                     UpdateItemSettings();
@@ -723,10 +744,10 @@ namespace YetAnotherNote
         public PresetItem MovedItem;
         public Folder Main;
         public MainWindow MainWindow;
-        public List<StackPanel> StackPanels;
+        public List<Grid> StackPanels;
         public Presets(MainWindow window)
         {
-            StackPanels = new List<StackPanel>();
+            StackPanels = new List<Grid>();
             MainWindow = window;
             Main = new Folder(null, "Presets", this);
             GenerateAppData();
@@ -796,7 +817,7 @@ namespace YetAnotherNote
             //StackPanels.AddRange(baseFolder.Presets.Select(x => x.GenerateItem(GetNumberOfParents(x))).ToList());
             foreach (PresetItem item in baseFolder.Presets)
             {
-                StackPanels.Add((StackPanel)item.GenerateItem().Children[0]);
+                StackPanels.Add(item.GenerateItem());
                 if (item.GetType() == typeof(Folder) && ((Folder)item).IsExpanded)
                 {
                     GenerateStackPanels((Folder)item);
@@ -810,7 +831,7 @@ namespace YetAnotherNote
             {
                 if (!StackPanels.Contains(item.StackPanelItem))
                 {
-                    StackPanels.Insert(index++, (StackPanel)item.GenerateItem().Children[0]);
+                    StackPanels.Insert(index++, item.GenerateItem());
                     if (item.GetType() == typeof(Folder) && ((Folder)item).IsExpanded)
                     {
                         GenerateStackPanels(index, (Folder)item);
@@ -849,8 +870,8 @@ namespace YetAnotherNote
             foreach (var item in StackPanels)
             {
                 item.Margin = new Thickness(0, 0.1, 0, 0);
-                if (!MainWindow.ScrollViewerContent.Children.Contains((Grid)item.Parent))
-                    MainWindow.ScrollViewerContent.Children.Insert(i, (Grid)item.Parent);
+                if (!MainWindow.ScrollViewerContent.Children.Contains((Grid)item))
+                    MainWindow.ScrollViewerContent.Children.Insert(i, (Grid)item);
                 i++;
             }
             //ScrollBar scrollBar = new ScrollBar();
@@ -869,7 +890,7 @@ namespace YetAnotherNote
                 g = Convert.ToInt32(hex.Substring(2, 2), 16);
                 b = Convert.ToInt32(hex.Substring(4, 2), 16);
             }
-            else 
+            else
             {
                 r = Convert.ToInt32(hex[0] + hex[0].ToString(), 16);
                 g = Convert.ToInt32(hex[1] + hex[1].ToString(), 16);
@@ -882,7 +903,7 @@ namespace YetAnotherNote
             var red = Convert.ToString(Red, 16);
             var green = Convert.ToString(Green, 16);
             var blue = Convert.ToString(Blue, 16);
-            return (red.Count()==1?red+red:red )+ (green.Count()==1?green+green:green)+(blue.Count()==1?blue+blue:blue) ;
+            return (red.Count() == 1 ? red + red : red) + (green.Count() == 1 ? green + green : green) + (blue.Count() == 1 ? blue + blue : blue);
         }
     }
 

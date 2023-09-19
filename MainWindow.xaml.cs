@@ -240,7 +240,7 @@ namespace YetAnotherNote
             }
         }
         List<Editor> EditorWindows = new List<Editor>();
-        private void ShowButton_Click(object sender, RoutedEventArgs e)
+        public void ShowButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is ToggleButton toggleButton)
             {
@@ -266,7 +266,15 @@ namespace YetAnotherNote
                     // Perform actions for when the button is unchecked
                 }
             }
-            
+            else
+            {
+                Editor editor = ActivePresetControl.editor;
+                editor.Close();
+                ActivePresetControl.editor = null;
+                EditorWindows.Remove(editor);
+                // Button is unchecked (toggled off)
+                // Perform actions for when the button is unchecked
+            }
         }
     }
 }
