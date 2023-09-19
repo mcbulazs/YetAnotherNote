@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -24,13 +25,15 @@ namespace YetAnotherNote
     /// </summary>
     public partial class MainWindow : Window
     {
-        Presets CurrentPresetes;
+        Presets CurrentPresets;
         public Preset ActivePresetControl;
         public MainWindow()
         {
             InitializeComponent();
             ActivePresetControl = null;
-            CurrentPresetes = new Presets(this);
+            CurrentPresets = new Presets(this);
+            //ButtonStyle();
+
         }
         private void DragMainWindow(object sender, MouseButtonEventArgs e)
         {
@@ -38,11 +41,6 @@ namespace YetAnotherNote
             {
                 DragMove();
             }
-        }
-
-        private void Main(object sender, MouseButtonEventArgs e)
-        {
-
         }
 
         private void CloseMainWindow(object sender, MouseButtonEventArgs e)
@@ -55,11 +53,11 @@ namespace YetAnotherNote
         }
         private void CreateNewFolder(object sender, MouseButtonEventArgs e)
         {
-            CurrentPresetes.Main.CreateChildFolderMenu(sender, e);
+            CurrentPresets.Main.CreateChildFolderMenu(sender, e);
         }
         private void CreateNewPreset(object sender, MouseButtonEventArgs e)
         {
-            CurrentPresetes.Main.CreateChildPresetMenu(sender, e);
+            CurrentPresets.Main.CreateChildPresetMenu(sender, e);
         }
 
         private void TitleBarButtonMouseEnter(object sender, MouseEventArgs e)
@@ -84,17 +82,7 @@ namespace YetAnotherNote
             ((StackPanel)sender).Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
             //((Border)((TextBlock)sender).Parent).BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 0));
         }
-        public (int Red, int Green, int Blue) ConvertHexToRgb(string hex)
-        {
-            var r = Convert.ToInt32(hex.Substring(0, 2), 16);
-            var g = Convert.ToInt32(hex.Substring(2, 2), 16);
-            var b = Convert.ToInt32(hex.Substring(4, 2), 16);
-            return (r, g, b);
-        }
-        public string ConvertRgbToHex(int Red, int Green, int Blue)
-        {
-            return Convert.ToString(Red, 16) + Convert.ToString(Green, 16) + Convert.ToString(Blue, 16);
-        }
+       
 
         private void FColorSquereChanged(object sender, RoutedEventArgs e)
         {
@@ -102,9 +90,10 @@ namespace YetAnotherNote
             {
                 return;
             }
-            FColorHex.Text = ConvertRgbToHex((int)Math.Round(FColorSquare.Color.RGB_R), (int)Math.Round(FColorSquare.Color.RGB_G), (int)Math.Round(FColorSquare.Color.RGB_B)).ToUpper();
+            FColorHex.Text = Presets.ConvertRgbToHex((int)Math.Round(FColorSquare.Color.RGB_R), (int)Math.Round(FColorSquare.Color.RGB_G), (int)Math.Round(FColorSquare.Color.RGB_B)).ToUpper();
             ActivePresetControl.Content.ForegroundHex = FColorHex.Text;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
         }
         private void FColorHexChanged(object sender, KeyEventArgs e)
         {
@@ -124,9 +113,9 @@ namespace YetAnotherNote
             {
                 if (new Regex("^[A-Fa-f]$|^NumPad[0-9]$|^D[0-9]$").IsMatch(key) && new Regex("^([A-Fa-f0-9]{5}|[A-Fa-f0-9]{2})$").IsMatch(FColorHex.Text))
                 {
-                    FColorSquare.Color.RGB_R = ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Red;
-                    FColorSquare.Color.RGB_G = ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Green;
-                    FColorSquare.Color.RGB_B = ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Red;
+                    FColorSquare.Color.RGB_R = Presets.ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Red;
+                    FColorSquare.Color.RGB_G = Presets.ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Green;
+                    FColorSquare.Color.RGB_B = Presets.ConvertHexToRgb(FColorHex.Text + key[key.Length - 1]).Red;
                 }
 
             }
@@ -142,9 +131,10 @@ namespace YetAnotherNote
             {
                 return;
             }
-            BColorHex.Text = ConvertRgbToHex((int)Math.Round(BColorSquare.Color.RGB_G), (int)Math.Round(BColorSquare.Color.RGB_G), (int)Math.Round(BColorSquare.Color.RGB_B)).ToUpper();
+            BColorHex.Text = Presets.ConvertRgbToHex((int)Math.Round(BColorSquare.Color.RGB_R), (int)Math.Round(BColorSquare.Color.RGB_G), (int)Math.Round(BColorSquare.Color.RGB_B)).ToUpper();
             ActivePresetControl.Content.BackgroundHex = BColorHex.Text;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
             //FColorHex. = ((ColorPicker.SquarePicker)sender).Color;
         }
         private void BColorHexChanged(object sender, KeyEventArgs e)
@@ -165,9 +155,9 @@ namespace YetAnotherNote
             {
                 if (new Regex("^[A-Fa-f]$|^NumPad[0-9]$|^D[0-9]$").IsMatch(key) && new Regex("^([A-Fa-f0-9]{5}|[A-Fa-f0-9]{2})$").IsMatch(BColorHex.Text))
                 {
-                    BColorSquare.Color.RGB_R = ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Red;
-                    BColorSquare.Color.RGB_G = ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Green;
-                    BColorSquare.Color.RGB_B = ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Red;
+                    BColorSquare.Color.RGB_R = Presets.ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Red;
+                    BColorSquare.Color.RGB_G = Presets.ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Green;
+                    BColorSquare.Color.RGB_B = Presets.ConvertHexToRgb(BColorHex.Text + key[key.Length - 1]).Red;
                 }
 
             }
@@ -181,11 +171,13 @@ namespace YetAnotherNote
         {
             ActivePresetControl.Content.ForegroundAlpha = FColorAlpha.Color.A;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
         }
         private void BColorAplhaChanged(object sender, RoutedEventArgs e)
         {
             ActivePresetControl.Content.BackgroundAlpha = BColorAlpha.Color.A;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
         }
 
         private void CBClickThrough_Click(object sender, RoutedEventArgs e)
@@ -193,18 +185,21 @@ namespace YetAnotherNote
 
             ActivePresetControl.Content.ClickThrough = (bool)CBClickThrough.IsChecked;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
         }
 
         private void CBTopMost_Click(object sender, RoutedEventArgs e)
         {
-            ActivePresetControl.Content.TopMost = (bool)CBClickThrough.IsChecked;
+            ActivePresetControl.Content.TopMost = (bool)CBTopMost.IsChecked;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
         }
 
         private void CBRemoveBorder_Click(object sender, RoutedEventArgs e)
         {
-            ActivePresetControl.Content.RemoveBorder = (bool)CBClickThrough.IsChecked;
+            ActivePresetControl.Content.RemoveBorder = (bool)CBRemoveBorder.IsChecked;
             ActivePresetControl.UpdateItemSettings();
+            ActivePresetControl.editor?.UpdateSettings();
         }
 
         private void FontSizeKeyDown(object sender, KeyEventArgs e)
@@ -224,16 +219,54 @@ namespace YetAnotherNote
 
         private void FontSizeDecreaseValue(object sender, RoutedEventArgs e)
         {
-            if (FontSizeTextBox.Text!="0")
+            if (FontSizeTextBox.Text!="1")
             {
                 FontSizeTextBox.Text = (int.Parse(FontSizeTextBox.Text) - 1).ToString();
             }
         }
 
         private void UpdateFontSizeSettings(object sender, TextChangedEventArgs e)
-        {/*
-            ActivePresetControl.Content.FontSize = int.Parse(FontSizeTextBox.Text);
-            ActivePresetControl.UpdateItemSettings();*/
+        {
+            if(FontSizeTextBox.Text.Length == 0 || new Regex("^0*$").IsMatch(FontSizeTextBox.Text))
+            {
+                FontSizeTextBox.Text = "1";
+
+            }
+            if (ActivePresetControl!=null)
+            {
+                ActivePresetControl.Content.FontSize = int.Parse(FontSizeTextBox.Text);
+                ActivePresetControl.UpdateItemSettings();
+                ActivePresetControl.editor?.UpdateSettings();
+            }
+        }
+        List<Editor> EditorWindows = new List<Editor>();
+        private void ShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton toggleButton)
+            {
+                if (toggleButton.IsChecked == true)
+                {
+                    this.ActivePresetControl.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(120, 120, 120));
+                    this.ActivePresetControl.isSelected = true;
+                    Editor editor = new Editor(ActivePresetControl,this);
+                    ActivePresetControl.editor= editor;
+                    editor.Show();
+                    EditorWindows.Add(editor);
+                    // Button is checked (toggled on)
+                    // Perform actions for when the button is checked
+                }
+                else
+                {
+                    this.ActivePresetControl.isSelected = false ;
+                    Editor editor = ActivePresetControl.editor;
+                    editor.Close();
+                    ActivePresetControl.editor = null;
+                    EditorWindows.Remove(editor);
+                    // Button is unchecked (toggled off)
+                    // Perform actions for when the button is unchecked
+                }
+            }
+            
         }
     }
 }

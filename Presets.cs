@@ -3,27 +3,33 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-
+using System.Windows.Media.Imaging;
 
 namespace YetAnotherNote
 {
     public class ContentImage
     {
+        public long Id;
         public double Width;
         public double Height;
         public double X;
         public double Y;
-        public string Image;
+        public byte[] Image;
     }
-    public class PresetContent 
+    public class PresetContent
     {
+        public string Text;
         public double X;
         public double Y;
+        public double Width;
+        public double Height;
         public string ForegroundHex;
         public string BackgroundHex;
         public double ForegroundAlpha;
@@ -32,7 +38,9 @@ namespace YetAnotherNote
         public bool RemoveBorder;
         public bool ClickThrough;
         public int FontSize;
-        List<ContentImage> ContentImages;
+        public List<ContentImage> ContentImages;
+        public int NextImageId=0;
+
     }
     class ItemSettings
     {
@@ -58,6 +66,8 @@ namespace YetAnotherNote
         public StackPanel StackPanelItem;
         public string FolderName;
         public static string AppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\YetAnotherNote";
+        public bool isSelected=false;
+        public bool isActive = false;
         public PresetItem(Folder parent, string name, Presets context, string path)
         {
             this.Name = name;
@@ -175,16 +185,18 @@ namespace YetAnotherNote
                 output += e;
             return output;
         }
-        public virtual StackPanel GenerateItem()
+        public virtual Grid GenerateItem()
         {
             int numberOfParents = GetNumberOfParents();
+            Grid grid = new Grid();
+            grid.Height = 15;
+            grid.HorizontalAlignment = HorizontalAlignment.Stretch;
             StackPanel item = new StackPanel();
             item.Height = 15;
             item.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
             item.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             item.Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
             item.Orientation = Orientation.Horizontal;
-            item.SizeChanged += StackPanelSizeChanged;
             //Text
             TextBlock Text = new TextBlock();
             Text.Height = 15;
@@ -204,7 +216,7 @@ namespace YetAnotherNote
             TextBlock Move = new TextBlock();
             Move.Cursor = Cursors.Hand;
             Move.Text = "━";
-            Move.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            Move.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
             Move.TextAlignment = TextAlignment.Center;
             Move.VerticalAlignment = System.Windows.VerticalAlignment.Center;
             Move.Width = 15;
@@ -213,13 +225,26 @@ namespace YetAnotherNote
             Move.FontSize = 11;
             Move.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
             Move.MouseLeftButtonDown += MoveCommand;
+            Move.Margin = new Thickness(0, 0, 5, 0);
             if (!Context.InMove || this.GetType() != typeof(Folder))
             {
                 Move.Visibility = Visibility.Collapsed;
             }
-            item.Children.Add(Move);
+            //item.Children.Add(Move);
 
             item.MouseLeftButtonDown += OpenControls;
+
+            item.MouseEnter += (object sender, MouseEventArgs e) =>
+            {
+                if (!this.isSelected && !this.isActive)
+                    item.Background = new SolidColorBrush(Color.FromRgb(80, 80, 80));
+            };
+            item.MouseLeave+= (object sender, MouseEventArgs e) =>
+            {
+                if (!this.isSelected && !this.isActive)
+                    item.Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
+            };
+
 
 
 
@@ -248,12 +273,22 @@ namespace YetAnotherNote
                     e.Handled = true; // Prevent the context menu from opening
                 }
             };
-            return item;
+            grid.Children.Add(item);
+            grid.Children.Add(Move);
+            return grid;
         }
         public void OpenControls(object sender, RoutedEventArgs e)
         {
-            return;
             MainWindow controls = Context.MainWindow;
+            if (controls.ActivePresetControl!=null)
+            {
+                controls.ActivePresetControl.isActive = false;
+                if (controls.ActivePresetControl.isSelected)
+                    controls.ActivePresetControl.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(40, 40, 40));
+                else
+                    controls.ActivePresetControl.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
+            }
+          
             if (this.GetType() == typeof(Preset))
             {
                 controls.PresetControls.Visibility = Visibility.Visible;
@@ -264,13 +299,16 @@ namespace YetAnotherNote
                 return;
             }
             Preset item = (Preset)this;
+            
+            this.isActive = true;
+            this.StackPanelItem.Background = new SolidColorBrush(Color.FromRgb(120, 120, 120));
 
             controls.ActivePresetControl = item;
             //foreground
-            var FColor = controls.ConvertHexToRgb(item.Content.ForegroundHex);
-            controls.FColorSquare.Color.RGB_R =  FColor.Red; 
-            controls.FColorSquare.Color.RGB_G =  FColor.Green; 
-            controls.FColorSquare.Color.RGB_B =  FColor.Blue;
+            var FColor = Presets.ConvertHexToRgb(item.Content.ForegroundHex);
+            controls.FColorSquare.Color.RGB_R = FColor.Red;
+            controls.FColorSquare.Color.RGB_G = FColor.Green;
+            controls.FColorSquare.Color.RGB_B = FColor.Blue;
 
             controls.FColorHex.Text = item.Content.ForegroundHex;
 
@@ -282,7 +320,7 @@ namespace YetAnotherNote
 
             controls.FontSizeTextBox.Text = item.Content.FontSize.ToString();
             //background
-            var BColor = controls.ConvertHexToRgb(item.Content.BackgroundHex);
+            var BColor = Presets.ConvertHexToRgb(item.Content.BackgroundHex);
             controls.BColorSquare.Color.RGB_R = BColor.Red;
             controls.BColorSquare.Color.RGB_G = BColor.Green;
             controls.BColorSquare.Color.RGB_B = BColor.Blue;
@@ -296,22 +334,22 @@ namespace YetAnotherNote
             controls.CBClickThrough.IsChecked = item.Content.ClickThrough;
             controls.CBRemoveBorder.IsChecked = item.Content.RemoveBorder;
 
-
+            controls.ShowButton.IsChecked = item.editor != null;
         }
         public void MoveMenu(object sender, RoutedEventArgs e)
         {
             Context.StackPanels.Where(x => x.Name == "Folder").ToList().ForEach(x =>
             {
-                TextBlock item = ((TextBlock)x.Children[2]);
+                TextBlock item = (TextBlock)((Grid)x.Parent).Children[1];
                 item.Visibility = Visibility.Visible;
                 item.Text = "━";
                 item.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
             });
             if (this.Parent != Context.Main)
             {
-                ((TextBlock)this.Parent.StackPanelItem.Children[2]).Visibility = Visibility.Collapsed;
+                ((TextBlock)((Grid)this.Parent.StackPanelItem.Parent).Children[1]).Visibility = Visibility.Collapsed;
             }
-            TextBlock thisItem = (TextBlock)this.StackPanelItem.Children[2];
+            TextBlock thisItem = (TextBlock)((Grid)this.StackPanelItem.Parent).Children[1];
             thisItem.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
             thisItem.Text = "✖";
             thisItem.Visibility = Visibility.Visible;
@@ -321,7 +359,7 @@ namespace YetAnotherNote
         }
         public void MoveCommand(object sender, RoutedEventArgs e)
         {
-            Context.StackPanels.ForEach(x => ((TextBlock)x.Children[2]).Visibility = Visibility.Collapsed);
+            Context.StackPanels.ForEach(x => ((TextBlock)((Grid)x.Parent).Children[1]).Visibility = Visibility.Collapsed);
             Context.InMove = false;
 
             Context.StackPanels.ForEach(x => x.ContextMenu.IsEnabled = true);
@@ -353,7 +391,7 @@ namespace YetAnotherNote
         public void StackPanelSizeChanged(object sender, RoutedEventArgs e)
         {
             TextBlock modifyitem = ((TextBlock)((StackPanel)sender).Children[2]);
-            if (modifyitem.Text== "✖")
+            if (modifyitem.Text == "✖")
             {
                 Context.MainWindow.FontSizeTextBox.Text = ((TextBlock)((StackPanel)sender).Children[1]).ActualWidth.ToString();
                 //Context.MainWindow.FontSizeTextBox.Text = modifyitem.Margin.Left.ToString();
@@ -393,11 +431,35 @@ namespace YetAnotherNote
     }
     public class Preset : PresetItem
     {
+        public Editor editor;
         public PresetContent Content;
-        public Preset(Folder parent, string name, Presets context, string path = null) : base(parent, name, context, path)
+        public Preset(Folder parent, string name, Presets context, string path = null, PresetContent content = null) : base(parent, name, context, path)
         {
             if (!File.Exists(getJsonPath()))
                 GenerateItemSettings();
+            if (content==null)
+            {
+                Content = new PresetContent
+                {
+                    BackgroundAlpha = 255,
+                    BackgroundHex = "000000",
+                    ClickThrough = false,
+                    FontSize = 12,
+                    ForegroundAlpha = 255,
+                    ForegroundHex = "FFFFFF",
+                    RemoveBorder = false,
+                    Text = "",
+                    TopMost = false,
+                    X = 0,
+                    Y = 0,
+                    Width = 500,
+                    Height = 500,
+                    ContentImages = new List<ContentImage>(),
+                };
+
+            }
+            else
+                Content = content;
         }
         public override void Delete()
         {
@@ -410,7 +472,8 @@ namespace YetAnotherNote
             settings.Type = "Preset";
             settings.Name = this.Name;
             settings.Path = this.Path;
-            settings.Content = this.Content;
+            PresetContent content = this.Content;
+            settings.Content = content;
 
             string json = JsonConvert.SerializeObject(settings);
             string path = getJsonPath();
@@ -425,10 +488,11 @@ namespace YetAnotherNote
             settings.Content = this.Content;
             File.WriteAllText(getJsonPath(), JsonConvert.SerializeObject(settings));
         }
-        public override StackPanel GenerateItem()
+        public override Grid GenerateItem()
         {
             int numberOfParents = GetNumberOfParents();
-            StackPanelItem = base.GenerateItem();
+            Grid grid = base.GenerateItem();
+            StackPanelItem = (StackPanel)grid.Children[0];
             StackPanelItem.Name = "Preset";
             TextBlock icon = new TextBlock();
             icon.Text = "🗎";
@@ -448,12 +512,7 @@ namespace YetAnotherNote
             StackPanelItem.ContextMenu.Items.Add(duplicate);
             ((TextBlock)StackPanelItem.Children[0]).Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
 
-            StackPanelItem.MouseLeftButtonDown += (sender, e) =>
-            {
-                Editor asd = new Editor(this);
-                asd.ShowDialog();
-            };
-            return StackPanelItem;
+            return grid;
         }
         public override string getJsonPath()
         {
@@ -584,10 +643,11 @@ namespace YetAnotherNote
             this.Name = Name;
             UpdateItemSettings();
         }
-        public override StackPanel GenerateItem()
+        public override Grid GenerateItem()
         {
             int numberOfParents = GetNumberOfParents();
-            StackPanelItem = base.GenerateItem();
+            Grid grid = base.GenerateItem();
+            StackPanelItem = (StackPanel)grid.Children[0];
             StackPanelItem.Name = "Folder";
             //Collapse button
             TextBlock collapse = new TextBlock();
@@ -625,7 +685,7 @@ namespace YetAnotherNote
             StackPanelItem.ContextMenu.Items.Add(newPreset);
 
             //StackPanelItem.MouseRightButtonDown += savePanelOnContextOpen;
-            return StackPanelItem;
+            return grid;
         }
 
         private void CollapseFolder(object sender, MouseButtonEventArgs e)
@@ -720,7 +780,9 @@ namespace YetAnotherNote
             }
             else if (settings.Type == "Preset")
             {
-                Preset f = new Preset(parent, settings.Name, this);
+
+                settings = JsonConvert.DeserializeObject<PresetItemSettings>(json);
+                Preset f = new Preset(parent, settings.Name, this, settings.Path, ((PresetItemSettings)settings).Content);
                 parent.Presets.Add(f);
             }
         }
@@ -734,7 +796,7 @@ namespace YetAnotherNote
             //StackPanels.AddRange(baseFolder.Presets.Select(x => x.GenerateItem(GetNumberOfParents(x))).ToList());
             foreach (PresetItem item in baseFolder.Presets)
             {
-                StackPanels.Add(item.GenerateItem());
+                StackPanels.Add((StackPanel)item.GenerateItem().Children[0]);
                 if (item.GetType() == typeof(Folder) && ((Folder)item).IsExpanded)
                 {
                     GenerateStackPanels((Folder)item);
@@ -748,7 +810,7 @@ namespace YetAnotherNote
             {
                 if (!StackPanels.Contains(item.StackPanelItem))
                 {
-                    StackPanels.Insert(index++, item.GenerateItem());
+                    StackPanels.Insert(index++, (StackPanel)item.GenerateItem().Children[0]);
                     if (item.GetType() == typeof(Folder) && ((Folder)item).IsExpanded)
                     {
                         GenerateStackPanels(index, (Folder)item);
@@ -763,7 +825,7 @@ namespace YetAnotherNote
             int amount = calcRemoveAmount(baseFolder);
             for (int i = index; i < index + amount; i++)
             {
-                MainWindow.ScrollViewerContent.Children.Remove(StackPanels[i]);
+                MainWindow.ScrollViewerContent.Children.Remove((Grid)StackPanels[i].Parent);
             }
             StackPanels.RemoveRange(index, amount);
             resizeStackPanels();
@@ -787,11 +849,9 @@ namespace YetAnotherNote
             foreach (var item in StackPanels)
             {
                 item.Margin = new Thickness(0, 0.1, 0, 0);
-                if (!MainWindow.ScrollViewerContent.Children.Contains(item))
-                    MainWindow.ScrollViewerContent.Children.Insert(i, item);
+                if (!MainWindow.ScrollViewerContent.Children.Contains((Grid)item.Parent))
+                    MainWindow.ScrollViewerContent.Children.Insert(i, (Grid)item.Parent);
                 i++;
-                item.MouseEnter += MainWindow.PresetMouseEnter;
-                item.MouseLeave += MainWindow.PresetMouseLeave;
             }
             //ScrollBar scrollBar = new ScrollBar();
             /*
@@ -799,6 +859,30 @@ namespace YetAnotherNote
             {
                 MainWindow.ScrollViewerContent.Children.Add(scrollBar);
             }*/
+        }
+        public static (int Red, int Green, int Blue) ConvertHexToRgb(string hex)
+        {
+            int r, g, b;
+            if (hex.Length == 6)
+            {
+                r = Convert.ToInt32(hex.Substring(0, 2), 16);
+                g = Convert.ToInt32(hex.Substring(2, 2), 16);
+                b = Convert.ToInt32(hex.Substring(4, 2), 16);
+            }
+            else 
+            {
+                r = Convert.ToInt32(hex[0] + hex[0].ToString(), 16);
+                g = Convert.ToInt32(hex[1] + hex[1].ToString(), 16);
+                b = Convert.ToInt32(hex[2] + hex[2].ToString(), 16);
+            }
+            return (r, g, b);
+        }
+        public static string ConvertRgbToHex(int Red, int Green, int Blue)
+        {
+            var red = Convert.ToString(Red, 16);
+            var green = Convert.ToString(Green, 16);
+            var blue = Convert.ToString(Blue, 16);
+            return (red.Count()==1?red+red:red )+ (green.Count()==1?green+green:green)+(blue.Count()==1?blue+blue:blue) ;
         }
     }
 

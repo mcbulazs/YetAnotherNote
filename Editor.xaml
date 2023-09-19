@@ -11,19 +11,23 @@
         ResizeMode="CanResizeWithGrip"
         MinHeight="100"
         MinWidth="100"
-        Topmost="True"
+        SizeChanged="EditorSizeChanged"
+        Background="Transparent" Closing="Window_Closing"
         >
-    <Grid>
+    <Grid Name="EditorGrid">
         <Grid.RowDefinitions>
-            <RowDefinition  Height="20" />
-            <RowDefinition/>
+            <RowDefinition Name="EditorTitleBarRow"  Height="20"/>
+            <RowDefinition />
         </Grid.RowDefinitions>
-        <Rectangle Grid.Row="0" Fill="#FFC30909" MouseLeftButtonDown="DragEditorWindow"/>
-        <Border Grid.Row="1" BorderBrush="#FFC30909" BorderThickness="3px,0,3px,3px"/>
-        <TextBox PreviewKeyDown="ImagePaste" TextWrapping="Wrap"  AcceptsReturn="True" Grid.Row="1" Margin="3,0,3,3" Background="Black" Foreground="White" ContextMenu="{x:Null}"/>
-        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="2px" HorizontalAlignment="Right" VerticalAlignment="Center" >
-            <TextBlock Name="MainWindowCloseButton" Text="✖" FontSize="12" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black" MouseDown="CloseEditorWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave" />
+            
+        <Rectangle Name="EditorTitleBar" VerticalAlignment="Stretch" Grid.Row="0" Fill="#FFC30909" MouseLeftButtonDown="DragEditorWindow"/>
+        <Border Name="EditorBorder" Grid.Row="1" BorderBrush="#FFC30909" BorderThickness="2px,0,2px,2px"/>
+        <Border Name="EditorCloseButton" Grid.Row="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2" Width="16px" Height="16px" Margin="2px" HorizontalAlignment="Right" VerticalAlignment="Center" >
+            <TextBlock Text="✖" FontSize="12" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black" MouseDown="CloseEditorWindow" MouseEnter="TitleBarButtonMouseEnter" MouseLeave="TitleBarButtonMouseLeave" />
         </Border>
-        
+        <Canvas Grid.Row="1"  Name="MainCanvas"  Margin="2,-1,2,2">
+            <TextBox Name="EditorTextBox" PreviewKeyDown="ImagePaste" TextWrapping="Wrap" Height="{Binding ActualHeight, ElementName=MainCanvas}" Width="{Binding ActualWidth, ElementName=MainCanvas}" AcceptsReturn="True"  Background="Black" Foreground="White" TextChanged="EditorTextBox_TextChanged" BorderBrush="Transparent" ContextMenu="{x:Null}" />
+        </Canvas>
+        <!--<Canvas Grid.Row="1" Name="ImageCanvas" IsHitTestVisible="False" Background="Transparent" Margin="1"/>-->
     </Grid>
 </Window>

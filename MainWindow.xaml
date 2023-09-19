@@ -47,7 +47,7 @@
                 <StackPanel  Name="ScrollViewerContent" Margin="0,0,0,3"/>
             </ScrollViewer>
             <GridSplitter Grid.Column="1" Width="5px" HorizontalAlignment="Stretch" Background="#FFC30909"/>
-            <Grid Grid.Column="2" Name="PresetControls" Visibility="Visible">
+            <Grid Grid.Column="2" Name="PresetControls" Visibility="Hidden">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -57,6 +57,8 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <!-- Foreground-->
+                <ToggleButton Name="ShowButton" Grid.Column="1" Grid.Row="0" Width="60" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" BorderBrush="#FFC30909" Background="Black" Content="Show" Foreground="#FFC30909" BorderThickness="3" Click="ShowButton_Click"/>
+
                 <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Foreground" Foreground="White" Height="30" VerticalAlignment="Top" HorizontalAlignment="Center"  Width="105" FontSize="20"/>
                 <colorpicker:SquarePicker Name="FColorSquare" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Margin="10"
                                    ColorState="{Binding ElementName=maindisplay, Path=ColorState, Mode=TwoWay, Delay=10}" Background="Transparent" ColorChanged="FColorSquereChanged"/>
@@ -77,10 +79,10 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <TextBlock  Grid.Column="0" Grid.RowSpan="2"  Text="Font Size: " Foreground="White" FontSize="15" Width="80" VerticalAlignment="Center" PreviewKeyDown="FontSizeKeyDown"/>
-                    <TextBox Name="FontSizeTextBox" FontSize="16" Grid.Column="1" Text="12" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="25" TextChanged="UpdateFontSizeSettings"/>
-                    <Button Grid.Column="2"  Grid.Row="0"  Width="20" Content="▲" Padding="0,-3,0,2" FontSize="11" HorizontalAlignment="Right" Click="FontSizeIncreaseValue" />
-                    <Button Grid.Column="2"  Grid.Row="1"  Width="20" Content="▼" Padding="0,-3,0,2" FontSize="11" HorizontalAlignment="Right" Click="FontSizeDecreaseValue" />
+                    <TextBlock  Grid.Column="0" Grid.RowSpan="2"  Text="Font Size: " Foreground="White" FontSize="15" Width="80" VerticalAlignment="Center" />
+                    <TextBox Name="FontSizeTextBox" FontSize="16" Grid.Column="1" Text="12" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="25" PreviewKeyDown="FontSizeKeyDown" TextChanged="UpdateFontSizeSettings"/>
+                    <Button Grid.Column="2"  Grid.Row="0"  Width="20" Content="▲" Padding="2,-3,0,2" FontSize="11" HorizontalAlignment="Right" Click="FontSizeIncreaseValue" />
+                    <Button Grid.Column="2"  Grid.Row="1"  Width="20" Content="▼" Padding="2,-2,0,2" FontSize="11" HorizontalAlignment="Right" Click="FontSizeDecreaseValue" />
                 </Grid>
                 <!--Background-->
                 <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Background" Foreground="White" Height="30" VerticalAlignment="Top" HorizontalAlignment="Center"  Width="105" FontSize="20"/>
@@ -138,8 +140,12 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="ScrollBar.xaml"></ResourceDictionary>
+                
             </ResourceDictionary.MergedDictionaries>
+            
         </ResourceDictionary>
+       
     </Window.Resources>
+        
 </Window>
     
