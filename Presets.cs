@@ -132,9 +132,9 @@ namespace YetAnotherNote
                 int amount = Context.calcRemoveAmount((Folder)this) + 1;
                 for (int i = index; i < index + amount; i++)
                 {
-                    
+
                     Context.MainWindow.ScrollViewerContent.Children.Remove(Context.StackPanels[i]);
-                    if (Context.StackPanels[i]==this.StackPanelItem)
+                    if (Context.StackPanels[i] == this.StackPanelItem)
                     {
                         Context.MainWindow.ShowButton_Click(null, null);
                         Context.MainWindow.PresetControls.Visibility = Visibility.Hidden;
@@ -144,10 +144,10 @@ namespace YetAnotherNote
             }
             else
             {
-                if (Context.MainWindow.ActivePresetControl==this)
+                if (Context.MainWindow.ActivePresetControl == this)
                 {
                     Context.MainWindow.ShowButton_Click(null, null);
-                    Context.MainWindow.PresetControls.Visibility= Visibility.Hidden;
+                    Context.MainWindow.PresetControls.Visibility = Visibility.Hidden;
                 }
                 int index = Context.StackPanels.IndexOf(this.StackPanelItem);
                 Context.MainWindow.ScrollViewerContent.Children.Remove(Context.StackPanels[index]);
@@ -361,29 +361,29 @@ namespace YetAnotherNote
         {
             Context.StackPanels.Where(x => x.Name == "Folder").ToList().ForEach(x =>
             {
-                TextBlock item = (TextBlock)((Grid)x.Parent).Children[1];
+                TextBlock item = (TextBlock)x.Children[1];
                 item.Visibility = Visibility.Visible;
                 item.Text = "━";
                 item.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
             });
             if (this.Parent != Context.Main)
             {
-                ((TextBlock)((Grid)this.Parent.StackPanelItem.Parent).Children[1]).Visibility = Visibility.Collapsed;
+                ((TextBlock)this.Parent.StackPanelItem.Children[1]).Visibility = Visibility.Collapsed;
             }
             TextBlock thisItem = (TextBlock)this.StackPanelItem.Children[1];
             thisItem.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
             thisItem.Text = "✖";
             thisItem.Visibility = Visibility.Visible;
             Context.InMove = true;
-            Context.StackPanels.ForEach(x => x.ContextMenu.IsEnabled = false);
+            Context.StackPanels.ForEach(x => ((StackPanel)x.Children[0]).ContextMenu.IsEnabled = false);
             Context.MovedItem = this;
         }
         public void MoveCommand(object sender, RoutedEventArgs e)
         {
-            Context.StackPanels.ForEach(x => ((TextBlock)((Grid)x.Parent).Children[1]).Visibility = Visibility.Collapsed);
+            Context.StackPanels.ForEach(x => ((TextBlock)x.Children[1]).Visibility = Visibility.Collapsed);
             Context.InMove = false;
 
-            Context.StackPanels.ForEach(x => x.ContextMenu.IsEnabled = true);
+            Context.StackPanels.ForEach(x => ((StackPanel)x.Children[0]).ContextMenu.IsEnabled = true);
 
             if (Context.MovedItem.Equals(this))
             {
@@ -531,6 +531,12 @@ namespace YetAnotherNote
             duplicate.Header = "Duplicate";
             duplicate.Click += Duplicate;
             ((StackPanel)StackPanelItem.Children[0]).ContextMenu.Items.Add(duplicate);
+
+            MenuItem export = new MenuItem();
+            export.Header = "Export Preset";
+            export.Click += Export;
+            ((StackPanel)StackPanelItem.Children[0]).ContextMenu.Items.Add(export);
+
             ((TextBlock)((StackPanel)StackPanelItem.Children[0]).Children[0]).Margin = new Thickness(numberOfParents * 10 + 5, 0, 0, 0);
 
             return grid;
@@ -549,6 +555,14 @@ namespace YetAnotherNote
             this.Parent.UpdateItemSettings();
             newItem.GenerateItem();
             Context.GenerateStackPanels(Context.StackPanels.IndexOf(this.StackPanelItem) + 1, this.Parent);
+        }
+        public void Export(object sender, RoutedEventArgs e)
+        {
+            string json = JsonConvert.SerializeObject(this.Content);
+            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+            string text = Convert.ToBase64String(plainTextBytes);
+            ImportExport expwin = new ImportExport(text);
         }
     }
     public class Folder : PresetItem
@@ -622,6 +636,26 @@ namespace YetAnotherNote
             new singleLine(this, "Create New Preset", CreateChildPreset).ShowDialog();
 
             //Context.GenerateStackPanels(Context.Main);
+        }
+        public void Import(object sender, RoutedEventArgs e)
+        {
+            new ImportExport("", ImportPreset);
+
+            //Context.GenerateStackPanels(Context.Main);
+        }
+        private void ImportPreset(object sender, string text)
+        {
+            singleLine sl = new singleLine(this, "Add name to Imported Preset", CreateChildPreset);
+            sl.ShowDialog();
+            if (sl.isSaved)
+            {
+                var base64EncodedBytes = System.Convert.FromBase64String(text);
+                string json = Encoding.UTF8.GetString(base64EncodedBytes);
+
+                PresetContent settings = JsonConvert.DeserializeObject<PresetContent>(json);
+
+                ((Preset)this.Presets.Last()).Content = settings;
+            }
         }
         private void CreateChildPreset(object sender, string name)
         {

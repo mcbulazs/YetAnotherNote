@@ -140,6 +140,8 @@ namespace YetAnotherNote
             FColor.Opacity = Context.Content.ForegroundAlpha / 255;
             EditorTextBox.Foreground = FColor;
 
+            Images.ForEach(x => x.rectangle.Background.Opacity = Context.Content.ForegroundAlpha / 255);
+
             var Brgb = Presets.ConvertHexToRgb(Context.Content.BackgroundHex);
             var BColor = new SolidColorBrush(Color.FromRgb((byte)Brgb.Red, (byte)Brgb.Green, (byte)Brgb.Blue));
             BColor.Opacity = Context.Content.BackgroundAlpha / 255;
@@ -241,6 +243,10 @@ namespace YetAnotherNote
 
         private void EditorSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            if (WindowState==WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+            }
             Context.Content.Width = this.Width;
             Context.Content.Height = this.Height;
         }
@@ -266,16 +272,17 @@ namespace YetAnotherNote
         public PastableImage(BitmapSource bmp, Editor editor, long? Id = null, double? width = null, double? height = null, double? x = null, double? y = null)
         {
             this.editor = editor;
-            ImageBrush Image = new ImageBrush();
-            Image.ImageSource = bmp;
+            ImageBrush image = new ImageBrush();
+            image.ImageSource = bmp;
             this.Id = Id ?? editor.Context.Content.NextImageId++;
+            image.Opacity = editor.Context.Content.ForegroundAlpha / 255;
             rectangle = new Grid
             {
                 Width = width ?? bmp.Width,
                 Height = height ?? bmp.Height,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
-                Background = Image,
+                Background = image,
                 Cursor = Cursors.Hand,
             };
             Canvas.SetLeft(rectangle, x ?? 50);

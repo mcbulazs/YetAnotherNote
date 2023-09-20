@@ -19,6 +19,7 @@ namespace YetAnotherNote
     /// </summary>
     public partial class singleLine : Window
     {
+        public bool isSaved;
         Action<object, string> ApplyEvent;
         object Caller;
         public singleLine()
@@ -32,17 +33,37 @@ namespace YetAnotherNote
             Title.Text = Text;
             ApplyEvent = action;
             TextLine.Text = fill;
+            TextLine.Focus();
         }
 
         private void CloseWindow(object sender, RoutedEventArgs e)
         {
+            isSaved=false;
             this.Close();
         }
 
         private void ApplyButtonClick(object sender, RoutedEventArgs e)
         {
+            isSaved=true;
             this.ApplyEvent(sender, TextLine.Text);
             this.Close();
+        }
+
+        private void TextLine_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key==Key.Enter)
+            {
+                isSaved = true;
+                this.ApplyEvent(sender, TextLine.Text);
+                this.Close();
+                return;
+            }
+            if (e.Key==Key.Escape)
+            {
+                isSaved = false;
+                this.Close();
+                return;
+            }
         }
     }
 }

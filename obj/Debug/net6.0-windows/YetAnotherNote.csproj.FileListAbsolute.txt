@@ -64,3 +64,6 @@ D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Microsoft.Win32.SystemEv
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\System.Drawing.Common.dll
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\YetAnotherNote_Content.g.cs
+D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\ImportExport.g.cs
+D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\ImportExport.baml

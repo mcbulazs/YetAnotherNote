@@ -13,6 +13,9 @@
     <Compile Update="Editor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ImportExport.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="singleLine.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -22,6 +25,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Editor.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ImportExport.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">

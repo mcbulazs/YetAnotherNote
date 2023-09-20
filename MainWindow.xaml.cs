@@ -59,6 +59,10 @@ namespace YetAnotherNote
         {
             CurrentPresets.Main.CreateChildPresetMenu(sender, e);
         }
+        private void Import(object sender, MouseButtonEventArgs e)
+        {
+            CurrentPresets.Main.Import(sender, e);
+        }
 
         private void TitleBarButtonMouseEnter(object sender, MouseEventArgs e)
         {
@@ -268,10 +272,13 @@ namespace YetAnotherNote
             }
             else
             {
-                Editor editor = ActivePresetControl.editor;
-                editor.Close();
-                ActivePresetControl.editor = null;
-                EditorWindows.Remove(editor);
+                if (ActivePresetControl!=null)
+                {
+                    Editor editor = ActivePresetControl.editor;
+                    editor.Close();
+                    ActivePresetControl.editor = null;
+                    EditorWindows.Remove(editor);
+                }
                 // Button is unchecked (toggled off)
                 // Perform actions for when the button is unchecked
             }
