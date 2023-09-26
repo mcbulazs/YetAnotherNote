@@ -243,7 +243,7 @@ namespace YetAnotherNote
                 ActivePresetControl.editor?.UpdateSettings();
             }
         }
-        List<Editor> EditorWindows = new List<Editor>();
+        public List<Editor> EditorWindows = new List<Editor>();
         public void ShowButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is ToggleButton toggleButton)
@@ -275,7 +275,10 @@ namespace YetAnotherNote
                 if (ActivePresetControl!=null)
                 {
                     Editor editor = ActivePresetControl.editor;
-                    editor.Close();
+                    if (editor !=null)
+                    {
+                        editor.Close();
+                    }
                     ActivePresetControl.editor = null;
                     EditorWindows.Remove(editor);
                 }

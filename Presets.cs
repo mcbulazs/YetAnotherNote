@@ -355,7 +355,7 @@ namespace YetAnotherNote
             controls.CBClickThrough.IsChecked = item.Content.ClickThrough;
             controls.CBRemoveBorder.IsChecked = item.Content.RemoveBorder;
 
-            controls.ShowButton.IsChecked = item.editor != null;
+            controls.ShowButton.IsChecked = item.isSelected ;
         }
         public void MoveMenu(object sender, RoutedEventArgs e)
         {
@@ -880,7 +880,7 @@ namespace YetAnotherNote
             int amount = calcRemoveAmount(baseFolder);
             for (int i = index; i < index + amount; i++)
             {
-                MainWindow.ScrollViewerContent.Children.Remove((Grid)StackPanels[i].Parent);
+                MainWindow.ScrollViewerContent.Children.Remove((Grid)StackPanels[i]);
             }
             StackPanels.RemoveRange(index, amount);
             resizeStackPanels();

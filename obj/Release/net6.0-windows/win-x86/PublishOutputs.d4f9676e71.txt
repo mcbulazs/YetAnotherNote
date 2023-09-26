@@ -1,0 +1,7 @@
+D:\viktornak\YetAnotherNote.pdb
+D:\viktornak\D3DCompiler_47_cor3.dll
+D:\viktornak\PenImc_cor3.dll
+D:\viktornak\PresentationNative_cor3.dll
+D:\viktornak\vcruntime140_cor3.dll
+D:\viktornak\wpfgfx_cor3.dll
+D:\viktornak\YetAnotherNote.exe

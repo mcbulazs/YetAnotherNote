@@ -1,0 +1,12 @@
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\YetAnotherNote.exe
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\YetAnotherNote.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\YetAnotherNote.deps.json
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\YetAnotherNote.runtimeconfig.json
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\YetAnotherNote.pdb
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\Microsoft.Win32.SystemEvents.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\Microsoft.Xaml.Behaviors.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\Newtonsoft.Json.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\ColorPicker.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\System.Drawing.Common.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
+D:\Projects\ C#\YetAnotherNote\bin\Release\net6.0-windows\app.publish\runtimes\win\lib\net6.0\System.Drawing.Common.dll

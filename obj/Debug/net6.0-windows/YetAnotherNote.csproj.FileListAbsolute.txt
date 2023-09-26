@@ -3,7 +3,6 @@ D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\YetAnotherNote.deps.json
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\YetAnotherNote.runtimeconfig.json
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\YetAnotherNote.dll
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\YetAnotherNote.pdb
-D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
 D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\YetAnotherNote.csproj.AssemblyReference.cache
 D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\ScrollBar.baml
 D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\Confirm.g.cs
@@ -58,12 +57,13 @@ D:\Projects\ C#\YetAnotherNote3\obj\Debug\net6.0-windows\refint\YetAnotherNote.d
 D:\Projects\ C#\YetAnotherNote3\obj\Debug\net6.0-windows\YetAnotherNote.pdb
 D:\Projects\ C#\YetAnotherNote3\obj\Debug\net6.0-windows\YetAnotherNote.genruntimeconfig.cache
 D:\Projects\ C#\YetAnotherNote3\obj\Debug\net6.0-windows\ref\YetAnotherNote.dll
-D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Microsoft.Xaml.Behaviors.dll
-D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\ColorPicker.dll
-D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Microsoft.Win32.SystemEvents.dll
-D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\System.Drawing.Common.dll
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
 D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\runtimes\win\lib\net6.0\System.Drawing.Common.dll
 D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\YetAnotherNote_Content.g.cs
 D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\ImportExport.g.cs
 D:\Projects\ C#\YetAnotherNote\obj\Debug\net6.0-windows\ImportExport.baml
+D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Microsoft.Win32.SystemEvents.dll
+D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Microsoft.Xaml.Behaviors.dll
+D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
+D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\ColorPicker.dll
+D:\Projects\ C#\YetAnotherNote\bin\Debug\net6.0-windows\System.Drawing.Common.dll

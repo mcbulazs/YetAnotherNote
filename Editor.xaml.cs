@@ -258,8 +258,14 @@ namespace YetAnotherNote
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this.MainWindow.ShowButton.IsChecked = false;
+            this.Context.isSelected= false;
+            ((StackPanel)this.Context.StackPanelItem.Children[0]).Background = new SolidColorBrush(Color.FromRgb(64, 64, 64));
+            if (this.MainWindow.ActivePresetControl.Equals(this.Context))
+            {
+                this.MainWindow.ShowButton.IsChecked = false;
+            }
         }
+
     }
     public class PastableImage
     {

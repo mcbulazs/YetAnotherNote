@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>asd.ico</ApplicationIcon>
+    <CosturaUnmanaged32Assemblies></CosturaUnmanaged32Assemblies>
+    <CosturaUnmanaged64Assemblies></CosturaUnmanaged64Assemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +16,9 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1" />
+    <PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1">
+      <GeneratePathProperty></GeneratePathProperty>
+    </PackageReference>
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
 
