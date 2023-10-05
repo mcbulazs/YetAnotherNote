@@ -254,6 +254,7 @@ namespace YetAnotherNote
         private void EditorTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Context.Content.Text = EditorTextBox.Text;
+            Context.UpdateItemSettings();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
