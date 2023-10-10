@@ -620,7 +620,7 @@ namespace YetAnotherNote
             {
                 index = Context.StackPanels.IndexOf(this.StackPanelItem);
                 Context.GenerateStackPanels(index + 1, this);
-                ((TextBlock)this.StackPanelItem.Children[0]).RenderTransform = new RotateTransform(0);
+                ((TextBlock)((StackPanel)this.StackPanelItem.Children[0]).Children[0]).RenderTransform = new RotateTransform(0);
             }
             else
             {
