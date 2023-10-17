@@ -417,10 +417,10 @@ namespace YetAnotherNote
             {
                 rectangle.Width = newWidth;
                 rectangle.Height = newHeight;
+                editor.Context.Content.ContentImages.Where(x => x.Id == this.Id).SingleOrDefault().Width = newWidth;
+                editor.Context.Content.ContentImages.Where(x => x.Id == this.Id).SingleOrDefault().Height = newHeight;
             }
-            editor.Context.Content.ContentImages.Where(x => x.Id == this.Id).SingleOrDefault().Width = newWidth;
-            editor.Context.Content.ContentImages.Where(x => x.Id == this.Id).SingleOrDefault().Height = newHeight;
-            editor.Context.Content.X = Canvas.GetLeft(rectangle);
+            //editor.Context.Content.X = Canvas.GetLeft(rectangle);
             editor.Context.UpdateItemSettings();
         }
         private void deleteImage(object sender, RoutedEventArgs e)
